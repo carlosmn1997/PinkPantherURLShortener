@@ -1,0 +1,57 @@
+swagger: "2.0"
+info:
+  description: "Simple example."
+  version: "1.0.0"
+  title: "Red Rock"
+host: "localhost"
+basePath: "/red-rock"
+tags:
+- name: "F1"
+  description: "Servicio de acortador URL con dirección personalizada"
+schemes:
+- "http"
+paths:
+  /short:
+    post:
+      tags:
+      - "F1"
+      summary: "El servicio acortador permite crear una dirección personalizada y, si ésta ya existe, se lo indica al usuario."
+      operationId: "createShortURI"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "URI a recortar"
+        required: true
+        schema:
+          $ref: "#/definitions/UriAcortada"
+      responses:
+        200:
+          description: "URI correcta"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        405:
+          description: "URI inválida"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+definitions:
+  UriAcortada:
+    type: "object"
+    properties:
+      slug:
+        type: "string"
+      uri:
+        type: "string"
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
