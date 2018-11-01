@@ -1,13 +1,15 @@
 swagger: "2.0"
 info:
-  description: "Simple example."
+  description: "A simple URL Shortener with loads of functionalities."
   version: "1.0.0"
-  title: "Red Rock"
+  title: "Pink Panther URL Shortener"
 host: "localhost"
 basePath: "/red-rock"
 tags:
 - name: "F1"
   description: "Servicio de acortador URL con dirección personalizada"
+- name: "F5"
+  description: "Servicio de creación de intersiciales de publicidad en las redirecciones"
 schemes:
 - "http"
 paths:
@@ -37,6 +39,33 @@ paths:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
+  /advert/{URIShorted}:
+    get:
+      tags:
+      - "F5"
+      summary: "El servicio devuelve en primer lugar la URI de la web a mostrar su publicidad y pasado un tiempo devuelve la URI asociada a la URI acortada."
+      operationId: "advertising"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: path
+        name: "URIShorted"
+        description: "URI acortada previamente"
+        required: true
+        schema:
+          $ref: "#/definitions/UriAcortada"
+      responses:
+        200:
+          description: "URI correcta"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        405:
+          description: "URI inválida"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+
 definitions:
   UriAcortada:
     type: "object"
@@ -54,4 +83,11 @@ definitions:
       type:
         type: "string"
       message:
+        type: "string"
+  UriA:
+    type: "object"
+    properties:
+      slug:
+        type: "string"
+      uri:
         type: "string"
