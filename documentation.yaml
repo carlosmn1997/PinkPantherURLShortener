@@ -4,41 +4,41 @@ info:
   version: "1.0.0"
   title: "Pink Panther URL Shortener"
 host: "localhost"
-basePath: "/red-rock"
+basePath: "/pink-panther"
 tags:
 - name: "F1"
-  description: "Servicio de acortador URL con dirección personalizada"
+  description: "Servicio de transformacion de URI a imagen QR"
 - name: "F5"
   description: "Servicio de creación de intersiciales de publicidad en las redirecciones"
 schemes:
 - "http"
 paths:
-  /short:
+  /QR/{URIShorted}:
     post:
       tags:
       - "F1"
-      summary: "El servicio acortador permite crear una dirección personalizada y, si ésta ya existe, se lo indica al usuario."
-      operationId: "createShortURI"
+      summary: "Al enviar la URI a un servicio que la convierta en QR devuelve una imagen que al acceder al contenido corresponde con la URI enviada."
+      operationId: "createURIQR"
       consumes:
       - "application/json"
       produces:
       - "application/json"
       parameters:
-      - in: "body"
-        name: "body"
-        description: "URI a recortar"
+      - in: path
+        name: "URIShorted"
+        description: "URI recortada previamente"
+        type: "string"
         required: true
-        schema:
-          $ref: "#/definitions/UriAcortada"
       responses:
         200:
           description: "URI correcta"
           schema:
             $ref: "#/definitions/ApiResponse"
-        405:
+        400:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
+
   /advert/{URIShorted}:
     get:
       tags:
