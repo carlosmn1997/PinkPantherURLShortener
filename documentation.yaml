@@ -51,17 +51,16 @@ paths:
       - "application/json"
       parameters:
       - in: path
-        name: "URIShorted"
-        description: "URI acortada previamente"
+        name: URIShorted
+        description: "URI deseada"
         required: true
-        schema:
-          $ref: "#/definitions/UriAcortada"
+        type: string
       responses:
         200:
-          description: "URI correcta"
+          description: "URI de la web de publicidad asociada"
           schema:
-            $ref: "#/definitions/ApiResponse"
-        405:
+            $ref: "#/definitions/ApiAdvertResponse"
+        400:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -84,7 +83,7 @@ definitions:
         type: "string"
       message:
         type: "string"
-  UriA:
+  ApiAdvertResponse:
     type: "object"
     properties:
       slug:
