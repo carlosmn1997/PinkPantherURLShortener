@@ -33,7 +33,7 @@ paths:
         200:
           description: "URI correcta"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiQRResponse"
         400:
           description: "URI inválida"
           schema:
@@ -88,5 +88,10 @@ definitions:
     properties:
       slug:
         type: "string"
+      uri:
+        type: "string"
+  ApiQRResponse:
+    type: "object"
+    properties:
       uri:
         type: "string"
