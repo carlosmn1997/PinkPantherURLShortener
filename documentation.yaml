@@ -8,6 +8,8 @@ basePath: "/pink-panther"
 tags:
 - name: "F1"
   description: "Servicio de transformacion de URI a imagen QR"
+- name: "F4"
+  description: "Servicio de obtención de información sobre el sistema"
 - name: "F5"
   description: "Servicio de creación de intersiciales de publicidad en las redirecciones"
 schemes:
@@ -38,6 +40,20 @@ paths:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
+
+  /stats:
+    get:
+      tags:
+      - "F4"
+      summary: "El servicio devuelve estadísticas de uso y carga del sistema."
+      operationId: "systemStats"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Info. sistema"
+          schema:
+            $ref: "#/definitions/ApiStatsResponse"
 
   /advert/{URIShorted}:
     get:
@@ -95,3 +111,20 @@ definitions:
     properties:
       uri:
         type: "string"
+  ApiStatsResponse:
+    type: "object"
+    properties:
+      uptime_seconds:
+        type: "integer"
+      user_number:
+        type: "integer"
+      uri_number:
+        type: "integer"
+      click_number:
+        type: "integer"
+      time_last_redirection:
+        type: "integer"
+      mem_used_mb:
+        type: "integer"
+      mem_available_mb:
+        type: "integer"
