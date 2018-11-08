@@ -1,7 +1,7 @@
-package urlshortener.common.repository.fixture;
+package urlshortener.team.repository.fixture;
 
-import urlshortener.common.domain.Click;
-import urlshortener.common.domain.ShortURL;
+import urlshortener.team.domain.Click;
+import urlshortener.team.domain.ShortURL;
 
 public class ClickFixture {
 

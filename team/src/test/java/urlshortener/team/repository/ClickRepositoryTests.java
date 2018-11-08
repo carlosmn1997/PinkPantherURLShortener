@@ -1,4 +1,4 @@
-package urlshortener.common.repository;
+package urlshortener.team.repository;
 
 import org.junit.After;
 import org.junit.Before;
@@ -7,9 +7,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
-import urlshortener.common.domain.Click;
-import urlshortener.common.repository.fixture.ClickFixture;
-import urlshortener.common.repository.fixture.ShortURLFixture;
+import urlshortener.team.domain.Click;
+import urlshortener.team.repository.ClickRepository;
+import urlshortener.team.repository.ClickRepositoryImpl;
+import urlshortener.team.repository.ShortURLRepository;
+import urlshortener.team.repository.ShortURLRepositoryImpl;
+import urlshortener.team.repository.fixture.ClickFixture;
+import urlshortener.team.repository.fixture.ShortURLFixture;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

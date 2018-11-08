@@ -1,4 +1,4 @@
-package urlshortener.common.web;
+package urlshortener.team.web;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,9 +9,11 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import urlshortener.common.domain.ShortURL;
-import urlshortener.common.repository.ClickRepository;
-import urlshortener.common.repository.ShortURLRepository;
+import urlshortener.team.domain.ShortURL;
+import urlshortener.team.repository.ClickRepository;
+import urlshortener.team.repository.ShortURLRepository;
+import urlshortener.team.web.UrlShortenerController;
+import urlshortener.team.web.fixture.ShortURLFixture;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -21,7 +23,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static urlshortener.common.web.fixture.ShortURLFixture.someUrl;
 
 public class UrlShortenerTests {
 
@@ -45,7 +46,7 @@ public class UrlShortenerTests {
     @Test
     public void thatRedirectToReturnsTemporaryRedirectIfKeyExists()
             throws Exception {
-        when(shortURLRepository.findByKey("someKey")).thenReturn(someUrl());
+        when(shortURLRepository.findByKey("someKey")).thenReturn(ShortURLFixture.someUrl());
         when(clickRepository.save(any())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
 
         mockMvc.perform(get("/{id}", "someKey")).andDo(print())

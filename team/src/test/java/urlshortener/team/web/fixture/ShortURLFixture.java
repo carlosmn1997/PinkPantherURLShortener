@@ -1,6 +1,6 @@
-package urlshortener.common.web.fixture;
+package urlshortener.team.web.fixture;
 
-import urlshortener.common.domain.ShortURL;
+import urlshortener.team.domain.ShortURL;
 
 public class ShortURLFixture {
 
