@@ -144,6 +144,8 @@ paths:
       summary: "Servicio que acorta todas las URLs indicadas en un fichero CSV. El fichero debe tener una URI por fila."
       consumes:
       - multipart/form-data
+      produces:
+      - text/csv
       parameters:
       - in: formData
         name: upfile
