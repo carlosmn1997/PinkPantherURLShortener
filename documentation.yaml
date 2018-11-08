@@ -10,18 +10,52 @@ tags:
   description: "Servicio de transformacion de URI a imagen QR"
 - name: "F2"
   description: "Servicio que comprueba que una URL se puede alcanzar antes de crear una URL corta"
+- name: "F3"
+  description: "Servicio que permite subir un CSV con todas las URI que se desean acortar y que devuelve un CSV con que contiene para cada URI su URI acortada."
 - name: "F4"
   description: "Servicio de obtención de información sobre el sistema"
 - name: "F5"
   description: "Servicio de creación de intersiciales de publicidad en las redirecciones"
+- name: "F6"
+  description: "Servicio que devuelve la URI asociada a la acortada"
+- name: "F7"
+  description: "Servicio de acortador URL con dirección personalizada"
+
 schemes:
 - "http"
 paths:
-  /QR/{URIShorted}:
+  /short:
+    post:
+      tags:
+      - "F7"
+      - "F2"
+      summary: "El servicio acortador permite crear una dirección personalizada y, si ésta ya existe, se lo indica al usuario."
+      operationId: "createShortURI"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "URI a recortar"
+        required: true
+        schema:
+          $ref: "#/definitions/UriAcortada"
+      responses:
+        200:
+          description: "URI correcta"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        405:
+          description: "URI inválida"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+  /QR/{id}:
     post:
       tags:
       - "F1"
-      summary: "Al enviar la URI a un servicio que la convierta en QR devuelve una imagen que al acceder al contenido corresponde con la URI enviada."
+      summary: "Envia la URI acortada que se corresponde con id a un servicio para que la convierta en QR. El sistema devuelve una imagen QR que corresponde con la URI enviada."
       operationId: "createURIQR"
       consumes:
       - "application/json"
@@ -29,33 +63,38 @@ paths:
       - "application/json"
       parameters:
       - in: path
-        name: "URIShorted"
+        name: "id"
         description: "URI recortada previamente"
         type: "string"
         required: true
       responses:
-        200:
+        201:
           description: "URI correcta"
           schema:
             $ref: "#/definitions/ApiQRResponse"
-        400:
+        502:
+          description: "Servidor QR no responde"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        404:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
 
-  /uri/{LongURI}:
+  /{id}:
     get:
       tags:
-      - "F2"
-      summary: "El servicio comprueba que la URI es alcanzable, devolviendo una URI acortada asociada en caso de que lo sea."
-      operationId: "checkURI"
+      - "F6"
+      - "F5"
+      summary: "Servicio que devuelve la URI asociada a la URI acortada"
+      operationId: "returnURI"
       consumes:
       - "application/json"
       produces:
       - "application/json"
       parameters:
       - in: path
-        name: "LongURI"
+        name: "id"
         description: "URI a recortar"
         type: "string"
         required: true
@@ -68,6 +107,53 @@ paths:
           description: "URI no alcanzable"
           schema:
             $ref: "#/definitions/ApiResponse"
+
+  /shortAndCheck:
+    post:
+      tags:
+      - "F2"
+      - "F1"
+      - "F3"
+      summary: "El servicio comprueba que la URI es alcanzable, devolviendo una URI acortada asociada en caso de que lo sea."
+      operationId: "checkAndCreateUri"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "URI a comrpobar y recortar"
+        required: true
+        schema:
+          $ref: "#/definitions/UriAcortada"
+      responses:
+        201:
+          description: "URI creada"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "URI no alcanzable"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+
+  /uploadCSV:
+    post:
+      tags:
+      - "F3"
+      summary: "Servicio que acorta todas las URLs indicadas en un fichero CSV. El fichero debe tener una URI por fila."
+      consumes:
+      - multipart/form-data
+      parameters:
+      - in: formData
+        name: upfile
+        type: file
+        description: The file to upload.
+      responses:
+        201:
+          description: "URIs creada"
+          schema:
+            $ref: "#/definitions/ApiResponseCSV"
 
   /stats:
     get:
@@ -83,11 +169,39 @@ paths:
           schema:
             $ref: "#/definitions/ApiStatsResponse"
 
-  /advert/{URIShorted}:
+  /pruebaAsincrono:
+    get:
+      produces: ["text/event-stream"]
+      responses:
+        default:
+          description: example of defining events for sse
+          schema:
+            type: object
+            x-events:
+              added:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+              updated:
+                type: object
+                properties:
+                  previous:
+                    type: string
+                  newValue:
+                    type: string
+                  updatedAt:
+                    type: string
+                    format: date-time
+
+  /sponsor/{URIShorted}:
     get:
       tags:
       - "F5"
-      summary: "El servicio devuelve en primer lugar la URI de la web a mostrar su publicidad y pasado un tiempo devuelve la URI asociada a la URI acortada."
+      summary: "El servicio devuelve en primer lugar la URI de la web a mostrar su publicidad y pasado un tiempo llama a F1"
       operationId: "advertising"
       consumes:
       - "application/json"
@@ -101,9 +215,9 @@ paths:
         type: string
       responses:
         200:
-          description: "URI de la web de publicidad asociada"
+          description: "URI del Sponsor Asociado"
           schema:
-            $ref: "#/definitions/ApiAdvertResponse"
+            $ref: "#/definitions/ApiSponsorResponse"
         400:
           description: "URI inválida"
           schema:
@@ -127,7 +241,7 @@ definitions:
         type: "string"
       message:
         type: "string"
-  ApiAdvertResponse:
+  ApiSponsorResponse:
     type: "object"
     properties:
       slug:
@@ -156,3 +270,7 @@ definitions:
         type: "integer"
       mem_available_mb:
         type: "integer"
+  ApiResponseCSV:
+    type: "array"
+    items:
+      type: string
