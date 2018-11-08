@@ -8,6 +8,8 @@ basePath: "/pink-panther"
 tags:
 - name: "F1"
   description: "Servicio de transformacion de URI a imagen QR"
+- name: "F2"
+  description: "Servicio que comprueba que una URL se puede alcanzar antes de crear una URL corta"
 - name: "F4"
   description: "Servicio de obtención de información sobre el sistema"
 - name: "F5"
@@ -38,6 +40,32 @@ paths:
             $ref: "#/definitions/ApiQRResponse"
         400:
           description: "URI inválida"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+
+  /uri/{LongURI}:
+    get:
+      tags:
+      - "F2"
+      summary: "El servicio comprueba que la URI es alcanzable, devolviendo una URI acortada asociada en caso de que lo sea."
+      operationId: "checkURI"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: path
+        name: "LongURI"
+        description: "URI a recortar"
+        type: "string"
+        required: true
+      responses:
+        200:
+          description: "URI alcanzable"
+          schema:
+            $ref: "#/definitions/UriAcortada"
+        404:
+          description: "URI no alcanzable"
           schema:
             $ref: "#/definitions/ApiResponse"
 
