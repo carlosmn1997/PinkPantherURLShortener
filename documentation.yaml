@@ -7,7 +7,14 @@ host: "localhost:8080"
 basePath: "/"
 tags:
 - name: "F1"
-  description: "Servicio de transformacion de URI a imagen QR"
+  description: |
+    Servicio de transformacion de URI a imagen QR
+    - 3
+    - 4
+    - 8
+    ```json
+      {msg: "ejemplo"}
+    ```
 - name: "F2"
   description: "Servicio que comprueba que una URL se puede alcanzar antes de crear una URL corta"
 - name: "F3"
