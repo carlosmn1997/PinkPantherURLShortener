@@ -34,32 +34,18 @@ public class SponsorController {
 	protected ClickRepository clickRepository;
 
 	@RequestMapping(value = "/sponsor/{id:(?!link).*}", method = RequestMethod.GET)
-	public ResponseEntity<?> redirectToSponsor(@PathVariable String id,
+	public ResponseEntity<String> redirectToSponsor(@PathVariable String id,
 			HttpServletRequest request) {
-		ShortURL l = shortURLRepository.findByKey(id);
-		if (l != null) {
-			createAndSaveClick(id, extractIP(request));
-			return createSuccessfulRedirectToResponse(l);
+
+	    ShortURL shorted = shortURLRepository.findByKey(id);
+	    String sponsor = shorted.getSponsor();
+		if (shorted != null) {
+			HttpHeaders h = new HttpHeaders();
+			h.setLocation(shorted.getUri());
+			return new ResponseEntity<>(sponsor, h, HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-	}
-
-	private void createAndSaveClick(String hash, String ip) {
-		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
-				null, null, null, ip, null);
-		cl=clickRepository.save(cl);
-		LOG.info(cl!=null?"["+hash+"] saved with id ["+cl.getId()+"]":"["+hash+"] was not saved");
-	}
-
-	private String extractIP(HttpServletRequest request) {
-		return request.getRemoteAddr();
-	}
-
-	private ResponseEntity<?> createSuccessfulRedirectToResponse(ShortURL l) {
-		HttpHeaders h = new HttpHeaders();
-		h.setLocation(URI.create(l.getSponsor()));
-		return new ResponseEntity<>(h, HttpStatus.valueOf(l.getMode()));
 	}
 
 }

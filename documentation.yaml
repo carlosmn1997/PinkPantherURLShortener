@@ -43,23 +43,54 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - in: "body"
-        name: "body"
+      - in: query
+        name: "uri"
         description: "URI a recortar"
         required: true
-        schema:
-          $ref: "#/definitions/UriAcortada"
+        type: string
+      - in: query
+        name: "sponsor"
+        description: "URI del sponsor"
+        type: string
+
       responses:
         404:
           description: "Not found"
-        200:
-          description: "URI correcta"
+        201:
+          description: "URI creada correctamente"
           schema:
             $ref: "#/definitions/ApiResponse"
         405:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
+  /{id}:
+    get:
+      tags:
+      - "F6"
+      - "F5"
+      summary: "Servicio que devuelve la URI asociada a la URI acortada"
+      operationId: "returnURI"
+      parameters:
+      - in: path
+        name: "id"
+        description: "id URI acortada"
+        type: "string"
+        required: true
+      responses:
+        307:
+          description: "URI alcanzable"
+          schema:
+            $ref: "#/definitions/AcortarUri"
+        200:
+          description: "URI alcanzable"
+          schema:
+            $ref: "#/definitions/AcortarUri"
+        404:
+          description: "URI no alcanzable"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+
   /QR/{id}:
     post:
       tags:
@@ -90,33 +121,6 @@ paths:
           schema:
             $ref: "#/definitions/ApiResponse"
 
-  /{id}:
-    get:
-      tags:
-      - "F6"
-      - "F5"
-      summary: "Servicio que devuelve la URI asociada a la URI acortada"
-      operationId: "returnURI"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: path
-        name: "id"
-        description: "URI a recortar"
-        type: "string"
-        required: true
-      responses:
-        200:
-          description: "URI alcanzable"
-          schema:
-            $ref: "#/definitions/UriAcortada"
-        404:
-          description: "URI no alcanzable"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-
   /shortAndCheck:
     post:
       tags:
@@ -135,7 +139,7 @@ paths:
         description: "URI a comrpobar y recortar"
         required: true
         schema:
-          $ref: "#/definitions/UriAcortada"
+          $ref: "#/definitions/AcortarUri"
       responses:
         201:
           description: "URI creada"
@@ -154,17 +158,17 @@ paths:
       consumes:
       - multipart/form-data
       produces:
-      - text/csv
+      - application/csv
       parameters:
       - in: formData
-        name: upfile
+        name: file
         type: file
-        description: The file to upload.
+        description: "fichero csv"
       responses:
         201:
-          description: "URIs creada"
+          description: "URIs creadas"
           schema:
-            $ref: "#/definitions/ApiResponseCSV"
+            type: file
 
   /stats:
     get:
@@ -208,20 +212,18 @@ paths:
                     type: string
                     format: date-time
 
-  /sponsor/{URIShorted}:
+  /sponsor/{id}:
     get:
       tags:
       - "F5"
-      summary: "El servicio devuelve en primer lugar la URI de la web a mostrar su publicidad y pasado un tiempo llama a F1"
+      summary: "El servicio devuelve en primer lugar la URI de la web a mostrar su publicidad y pasado un tiempo invoca a F1"
       operationId: "advertising"
-      consumes:
-      - "application/json"
       produces:
-      - "application/json"
+      - "text/plain"
       parameters:
       - in: path
-        name: URIShorted
-        description: "URI deseada"
+        name: id
+        description: "identificador de la URI acortada"
         required: true
         type: string
       responses:
@@ -235,13 +237,15 @@ paths:
             $ref: "#/definitions/ApiResponse"
 
 definitions:
-  UriAcortada:
+  AcortarUri:
     type: "object"
     properties:
-      slug:
-        type: "string"
       uri:
         type: "string"
+      sponsor:
+        type: "string"
+    example:
+      uri: "https://es.stackoverflow.com/"
   ApiResponse:
     type: "object"
     properties:

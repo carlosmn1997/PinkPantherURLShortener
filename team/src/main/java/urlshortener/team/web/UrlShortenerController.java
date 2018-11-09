@@ -67,11 +67,11 @@ public class UrlShortenerController {
 		return new ResponseEntity<>(h, HttpStatus.valueOf(l.getMode()));
 	}
 
-	@RequestMapping(value = "/link", method = RequestMethod.POST)
-	public ResponseEntity<ShortURL> shortener(@RequestParam("url") String url,
+	@RequestMapping(value = "/short", method = RequestMethod.POST)
+	public ResponseEntity<ShortURL> shortener(@RequestParam("uri") String uri,
 											  @RequestParam(value = "sponsor", required = false) String sponsor,
 											  HttpServletRequest request) {
-		ShortURL su = createAndSaveIfValid(url, sponsor, UUID
+		ShortURL su = createAndSaveIfValid(uri, sponsor, UUID
 				.randomUUID().toString(), extractIP(request));
 		if (su != null) {
 			HttpHeaders h = new HttpHeaders();

@@ -16,13 +16,21 @@ import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.ShortURLRepository;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
 
 @RestController
 public class CsvController {
@@ -35,7 +43,7 @@ public class CsvController {
 	protected ClickRepository clickRepository;
 
 
-	@RequestMapping(value = "/uploadCsv", method = RequestMethod.POST)
+	@RequestMapping(value = "/uploadCsv2", method = RequestMethod.POST)
 	public ResponseEntity<ShortURL> uploadCsv(@RequestParam("file") MultipartFile file,
                                               HttpServletRequest request) {
 		ShortURL su = null;
@@ -48,26 +56,59 @@ public class CsvController {
 		}
 	}
 
-	private ShortURL createAndSaveIfValid(String url, String sponsor,
-										  String owner, String ip) {
-		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
-				"https" });
-		if (urlValidator.isValid(url)) {
-			String id = Hashing.murmur3_32()
-					.hashString(url, StandardCharsets.UTF_8).toString();
-			ShortURL su = new ShortURL(id, url,
-					linkTo(
-							methodOn(UrlShortenerController.class).redirectTo(
-									id, null)).toUri(), sponsor, new Date(
-					System.currentTimeMillis()), owner,
-					HttpStatus.TEMPORARY_REDIRECT.value(), true, ip, null);
-			return shortURLRepository.save(su);
-		} else {
-			return null;
-		}
-	}
 
-    private String extractIP(HttpServletRequest request) {
-        return request.getRemoteAddr();
+    @RequestMapping(value = "/uploadCSV", method = RequestMethod.POST)
+    public void downloadCSV(HttpServletResponse response, @RequestParam("file") MultipartFile file,
+                            HttpServletRequest request) throws IOException {
+
+        String csvFileName = "books.csv";
+
+        response.setContentType("text/csv");
+
+        // creates mock data
+        String headerKey = "Content-Disposition";
+        String headerValue = String.format("attachment; filename=\"%s\"",
+                csvFileName);
+        response.setHeader(headerKey, headerValue);
+
+        Book book1 = new Book("Effective Java", "Java Best Practices",
+                "Joshua Bloch", "Addision-Wesley", "0321356683", "05/08/2008",
+                38);
+
+        Book book2 = new Book("Head First Java", "Java for Beginners",
+                "Kathy Sierra & Bert Bates", "O'Reilly Media", "0321356683",
+                "02/09/2005", 30);
+
+        Book book3 = new Book("Thinking in Java", "Java Core In-depth",
+                "Bruce Eckel", "Prentice Hall", "0131872486", "02/26/2006", 45);
+
+        Book book4 = new Book("Java Generics and Collections",
+                "Comprehensive guide to generics and collections",
+                "Naftalin & Philip Wadler", "O'Reilly Media", "0596527756",
+                "10/24/2006", 27);
+
+        List< Book > listBooks = Arrays.asList(book1, book2, book3, book4);
+
+        // uses the Super CSV API to generate CSV data from the model data
+        ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(),
+                CsvPreference.STANDARD_PREFERENCE);
+
+        String[] header = {
+                "Title",
+                "Description",
+                "Author",
+                "Publisher",
+                "isbn",
+                "PublishedDate",
+                "Price"
+        };
+
+        csvWriter.writeHeader(header);
+
+        for (Book aBook: listBooks) {
+            csvWriter.write(aBook, header);
+        }
+
+        csvWriter.close();
     }
 }
