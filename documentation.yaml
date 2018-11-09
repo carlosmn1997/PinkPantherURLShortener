@@ -3,8 +3,8 @@ info:
   description: "A simple URL Shortener with loads of functionalities."
   version: "1.0.0"
   title: "Pink Panther URL Shortener"
-host: "localhost"
-basePath: "/pink-panther"
+host: "localhost:8080"
+basePath: "/"
 tags:
 - name: "F1"
   description: "Servicio de transformacion de URI a imagen QR"
@@ -43,6 +43,8 @@ paths:
         schema:
           $ref: "#/definitions/UriAcortada"
       responses:
+        404:
+          description: "Not found"
         200:
           description: "URI correcta"
           schema:
