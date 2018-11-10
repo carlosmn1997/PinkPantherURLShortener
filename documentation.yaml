@@ -9,20 +9,29 @@ tags:
 - name: "F1"
   description: |
     Servicio de transformacion de URI a imagen QR
-    - 3
-    - 4
-    - 8
-    ```json
-      {msg: "ejemplo"}
-    ```
 - name: "F2"
   description: "Servicio que comprueba que una URL se puede alcanzar antes de crear una URL corta"
 - name: "F3"
-  description: "Servicio que permite subir un CSV con todas las URI que se desean acortar y que devuelve un CSV con que contiene para cada URI su URI acortada."
+  description: |
+    Servicio que permite subir un CSV con todas las URI que se desean acortar y que devuelve un CSV con que contiene para cada URI su URI acortada.
+    - Formato de entrada CSV:
+      | URIOriginal |
+      | ------- |
+      | http://midomino.com |
+      | http://mirecurso.com |
+    - Formato de salida CSV:
+      | URIOriginal | URIAcortada |
+      | ------- | -------- |
+      | http://midomino.com | http://recortada/123 |
+      | http://mirecurso.com | http://recortada/321 |
 - name: "F4"
   description: "Servicio de obtención de información sobre el sistema"
 - name: "F5"
-  description: "Servicio de creación de intersiciales de publicidad en las redirecciones"
+  description: |
+    Servicio de creación de intersiciales de publicidad en las redirecciones. Primero se devuelve el sponsor y pasado un tiempo se devuelve la URI original. La implementación es con **webSockets**
+    - **Secuencia de ejecución**:
+        1. Ejecutar /sponsor/{id}
+        2. Ejecutar /{id}
 - name: "F6"
   description: "Servicio que devuelve la URI asociada a la acortada"
 - name: "F7"
@@ -183,34 +192,6 @@ paths:
           description: "Info. sistema"
           schema:
             $ref: "#/definitions/ApiStatsResponse"
-
-  /pruebaAsincrono:
-    get:
-      produces: ["text/event-stream"]
-      responses:
-        default:
-          description: example of defining events for sse
-          schema:
-            type: object
-            x-events:
-              added:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  createdAt:
-                    type: string
-                    format: date-time
-              updated:
-                type: object
-                properties:
-                  previous:
-                    type: string
-                  newValue:
-                    type: string
-                  updatedAt:
-                    type: string
-                    format: date-time
 
   /sponsor/{id}:
     get:
