@@ -37,15 +37,22 @@ public class SponsorController {
 	public ResponseEntity<String> redirectToSponsor(@PathVariable String id,
 			HttpServletRequest request) {
 
-	    ShortURL shorted = shortURLRepository.findByKey(id);
-	    String sponsor = shorted.getSponsor();
-		if (shorted != null) {
-			HttpHeaders h = new HttpHeaders();
-			h.setLocation(shorted.getUri());
-			return new ResponseEntity<>(sponsor, h, HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
+        ShortURL shorted = shortURLRepository.findByKey(id);
+        if (shorted != null) {
+            String sponsor = shorted.getSponsor();
+            if (shorted != null) {
+                HttpHeaders h = new HttpHeaders();
+                h.setLocation(shorted.getUri());
+                return new ResponseEntity<>(sponsor, h, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+        else{
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("URI acortada no existe");
+        }
 	}
 
 }

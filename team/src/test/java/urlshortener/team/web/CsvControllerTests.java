@@ -6,11 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import urlshortener.team.domain.ShortURL;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.ShortURLRepository;
 import urlshortener.team.web.fixture.ShortURLFixture;
@@ -19,12 +16,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class SponsorControllerTests {
+public class CsvControllerTests {
 
     private MockMvc mockMvc;
 
@@ -44,13 +42,17 @@ public class SponsorControllerTests {
     }
 
     @Test
-    public void thatRedirectToWithSponsorReturnsTemporaryRedirectIfKeyExists()
-            throws Exception {
-        when(shortURLRepository.findByKey("someKey")).thenReturn(ShortURLFixture.someUrlWithSponsor());
-        when(clickRepository.save(any())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
+    public void thatCsvUploadResponseIsOK() throws Exception {
 
-       // mockMvc.perform(get("/sponsor/{id}", "someKey")).andDo(print());
-                //.andExpect(status().isOk())
-                //.andExpect(content().string("http://pinkpanther.com/"));
+/*
+        mockMvc.perform(post("/uploadCsv").param("uri", "http://example.com/"))
+                .andDo(print())
+                .andExpect(redirectedUrl("http://localhost/f684a3c4"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.hash", is("f684a3c4")))
+                .andExpect(jsonPath("$.uri", is("http://localhost/f684a3c4")))
+                .andExpect(jsonPath("$.target", is("http://example.com/")))
+                .andExpect(jsonPath("$.sponsor", is(nullValue())));
+    */
     }
 }

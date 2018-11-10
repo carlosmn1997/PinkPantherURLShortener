@@ -78,8 +78,8 @@ public class SystemTests {
 
 	private ResponseEntity<String> postLink(String url) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-		parts.add("url", url);
-		return restTemplate.postForEntity("/link", parts, String.class);
+		parts.add("uri", url);
+		return restTemplate.postForEntity("/short", parts, String.class);
 	}
 
 
