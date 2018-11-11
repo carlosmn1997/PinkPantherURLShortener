@@ -71,6 +71,9 @@ project ('team') {
 
         compile 'org.webjars:bootstrap:3.3.5'
         compile 'org.webjars:jquery:2.1.4'
+        
+        //QR Img
+        compile 'commons-io:commons-io:2.4'
 
         //Csv
         compile 'net.sf.supercsv:super-csv:2.4.0'
