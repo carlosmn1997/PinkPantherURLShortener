@@ -174,10 +174,14 @@ paths:
         type: file
         description: "fichero csv"
       responses:
-        201:
+        200:
           description: "URIs creadas"
           schema:
             type: file
+        404:
+          description: "URI no alcanzable"
+          schema:
+            $ref: "#/definitions/ApiResponse"
 
   /stats:
     get:

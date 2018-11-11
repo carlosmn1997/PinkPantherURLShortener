@@ -14,6 +14,7 @@ import urlshortener.team.domain.Click;
 import urlshortener.team.domain.CsvFormat;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.repository.ClickRepository;
+import urlshortener.team.repository.CsvRepository;
 import urlshortener.team.repository.ShortURLRepository;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -35,10 +37,9 @@ import org.supercsv.prefs.CsvPreference;
 
 @RestController
 public class CsvController {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(UrlShortenerController.class);
+
 	@Autowired
-	protected ShortURLRepository shortURLRepository;
+	protected CsvRepository csvRepository;
 
 	@Autowired
 	protected ClickRepository clickRepository;
@@ -58,10 +59,15 @@ public class CsvController {
                 csvFileName);
         response.setHeader(headerKey, headerValue);
 
-        CsvFormat file1 = new CsvFormat("http://uriexample1.com", "http://shorted/123");
-        CsvFormat file2 = new CsvFormat("http://uriexample2.com", "http://shorted/321");
+        List<String> uris = csvRepository.parserCsv(file);
+        List<String> urisShorted = new ArrayList<>();
+        for(String uri : uris){
+            // Shortening uri
+            // ...
+            urisShorted.add("http://localhostMock:8080/123");
+        }
 
-        List< CsvFormat > listBooks = Arrays.asList(file1, file2);
+        List<CsvFormat> csvList = csvRepository.createCsv(uris, urisShorted);
 
         // uses the Super CSV API to generate CSV data from the model data
         ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(),
@@ -74,7 +80,7 @@ public class CsvController {
 
         csvWriter.writeHeader(header);
 
-        for (CsvFormat aFile: listBooks) {
+        for (CsvFormat aFile: csvList) {
             csvWriter.write(aFile, header);
         }
 

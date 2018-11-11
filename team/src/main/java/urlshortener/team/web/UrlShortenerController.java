@@ -27,7 +27,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 
-@CrossOrigin
 @RestController
 public class UrlShortenerController {
 	private static final Logger LOG = LoggerFactory

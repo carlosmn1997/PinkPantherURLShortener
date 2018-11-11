@@ -46,11 +46,11 @@ public class SponsorControllerTests {
     @Test
     public void thatRedirectToWithSponsorReturnsTemporaryRedirectIfKeyExists()
             throws Exception {
-        when(shortURLRepository.findByKey("someKey")).thenReturn(ShortURLFixture.someUrlWithSponsor());
-        when(clickRepository.save(any())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
+       when(shortURLRepository.findByKey("someKey")).thenReturn(ShortURLFixture.someUrlWithSponsor());
+       when(clickRepository.save(any())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
 
-       // mockMvc.perform(get("/sponsor/{id}", "someKey")).andDo(print());
-                //.andExpect(status().isOk())
-                //.andExpect(content().string("http://pinkpanther.com/"));
+        mockMvc.perform(get("/sponsor/{id}", "someKey")).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string("http://pinkpanther.com/"));
     }
 }

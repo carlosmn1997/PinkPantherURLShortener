@@ -25,8 +25,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
 public class SponsorController {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(SponsorController.class);
 	@Autowired
 	protected ShortURLRepository shortURLRepository;
 
@@ -42,8 +40,7 @@ public class SponsorController {
             String sponsor = shorted.getSponsor();
             if (shorted != null) {
                 HttpHeaders h = new HttpHeaders();
-                h.setLocation(shorted.getUri());
-                return new ResponseEntity<>(sponsor, h, HttpStatus.OK);
+                return new ResponseEntity<>(shorted.getSponsor(), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }

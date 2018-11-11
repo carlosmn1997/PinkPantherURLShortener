@@ -1,15 +1,15 @@
 package urlshortener.team.repository;
 
+import org.springframework.web.multipart.MultipartFile;
+import urlshortener.team.domain.CsvFormat;
+
 import java.util.List;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 
 public interface CsvRepository {
 
-    List<String> parsetCsv(FileReader file);
+    List<String> parserCsv(MultipartFile file);
 
     // Return the location of the file
-    String createCsv(List<String> original, List<String> formatted);
+    List<CsvFormat> createCsv(List<String> original, List<String> formatted);
 }
