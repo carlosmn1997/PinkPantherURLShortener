@@ -21,9 +21,6 @@ public class StatsController {
     @Autowired
     protected StatsRepository statsRepository;
 
-    @Autowired
-    protected ClickRepository clickRepository;
-
     @RequestMapping(value = "/stats", method = RequestMethod.GET)
     public ResponseEntity<Stats> getStats(HttpServletRequest request) {
 
