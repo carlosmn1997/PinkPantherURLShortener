@@ -53,4 +53,15 @@ public class CsvControllerTests {
                 .andExpect(content().contentType("text/csv"))
                 .andDo(print());
     }
+
+    @Test
+    public void thatFileIsWrongParsingIt() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "application/csv", "URis to short".getBytes());
+        when(csvRepository.parserCsv(file)).thenReturn(null);
+
+        mockMvc.perform(multipart("/uploadCSV")
+                .file(file))
+                .andExpect(status().is(400))
+                .andDo(print());
+    }
 }
