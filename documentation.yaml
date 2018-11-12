@@ -130,37 +130,37 @@ paths:
           schema:
             $ref: "#/definitions/ApiResponse"
 
-  /shortAndCheck:
-    post:
-      tags:
-      - "F2"
-      - "F1"
-      - "F3"
-      summary: "El servicio comprueba que la URI es alcanzable, devolviendo una URI acortada asociada en caso de que lo sea."
-      operationId: "checkAndCreateUri"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: query
-        name: "uri"
-        description: "URI a recortar"
-        required: true
-        type: string
-      - in: query
-        name: "sponsor"
-        description: "URI del sponsor"
-        type: string
-      responses:
-        201:
-          description: "URI creada"
-          schema:
-            $ref: "#/definitions/ShortenerResponse"
-        404:
-          description: "URI no alcanzable"
-          schema:
-            $ref: "#/definitions/ShortenerResponse"
+/shortAndCheck:
+  post:
+    tags:
+    - "F2"
+    - "F1"
+    - "F3"
+    summary: "El servicio comprueba que la URI es alcanzable, devolviendo una URI acortada asociada en caso de que lo sea."
+    operationId: "checkAndCreateUri"
+    consumes:
+    - "application/json"
+    produces:
+    - "application/json"
+    parameters:
+    - in: query
+      name: "uri"
+      description: "URI a recortar"
+      required: true
+      type: string
+    - in: query
+      name: "sponsor"
+      description: "URI del sponsor"
+      type: string
+    responses:
+      201:
+        description: "URI creada"
+        schema:
+          $ref: "#/definitions/ShortenerResponse"
+      404:
+        description: "URI no alcanzable"
+        schema:
+          $ref: "#/definitions/ShortenerResponse"
 
   /uploadCSV:
     post:
@@ -286,3 +286,26 @@ definitions:
         type: "integer"
       mem_available_mb:
         type: "integer"
+  ShortenerResponse:
+    type: "object"
+    properties:
+      hash:
+        type: "string"
+      target:
+        type: "string"
+      uri:
+        type: "string"
+      sponsor:
+        type: "string"
+      created:
+        type: "string"
+      owner:
+        type: "string"
+      mode:
+        type: "integer"
+      safe:
+        type: "boolean"
+      ip:
+        type: "string"
+      country:
+        type: "string"
