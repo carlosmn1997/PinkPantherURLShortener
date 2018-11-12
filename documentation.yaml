@@ -177,12 +177,20 @@ paths:
         type: file
         description: "fichero csv"
       responses:
-        200:
+        201:
           description: "URIs creadas"
           schema:
             type: file
+        400:
+          description: "Fichero CSV malformado"
+          schema:
+            $ref: "#/definitions/ApiResponse"
         404:
           description: "URI no alcanzable"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        405:
+          description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
 
@@ -218,8 +226,13 @@ paths:
         200:
           description: "URI del Sponsor Asociado"
           schema:
-            $ref: "#/definitions/ApiSponsorResponse"
-        400:
+            type: string
+            example: "http://www.someMockSponsor.com"
+        404:
+          description: "URI no alcanzable"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        405:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -234,7 +247,6 @@ definitions:
         type: "string"
     example:
       uri: "https://es.stackoverflow.com/"
-      sponsor: "https://misponsor.com/"
   ApiResponse:
     type: "object"
     properties:
@@ -274,30 +286,3 @@ definitions:
         type: "integer"
       mem_available_mb:
         type: "integer"
-  ApiResponseCSV:
-    type: "array"
-    items:
-      type: string
-  ShortenerResponse:
-    type: "object"
-    properties:
-      hash:
-        type: "string"
-      target:
-        type: "string"
-      uri:
-        type: "string"
-      sponsor:
-        type: "string"
-      created:
-        type: "string"
-      owner:
-        type: "string"
-      mode:
-        type: "integer"
-      safe:
-        type: "boolean"
-      ip:
-        type: "string"
-      country:
-        type: "string"

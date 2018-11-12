@@ -46,7 +46,7 @@ public class CsvController {
 
 
     @RequestMapping(value = "/uploadCSV", method = RequestMethod.POST)
-    public void downloadCSV(HttpServletResponse response, @RequestParam("file") MultipartFile file,
+    public ResponseEntity<String> downloadCSV(HttpServletResponse response, @RequestParam("file") MultipartFile file,
                             HttpServletRequest request) throws IOException {
 
         String csvFileName = "mock.csv";
@@ -60,30 +60,38 @@ public class CsvController {
         response.setHeader(headerKey, headerValue);
 
         List<String> uris = csvRepository.parserCsv(file);
-        List<String> urisShorted = new ArrayList<>();
-        for(String uri : uris){
-            // Shortening uri
-            // ...
-            urisShorted.add("http://localhostMock:8080/123");
+        if(uris == null){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Fichero CSV mal formado");
         }
+        else{
+            List<String> urisShorted = new ArrayList<>();
+            for(String uri : uris){
+                // Shortening uri
+                // ...
+                urisShorted.add("http://localhostMock:8080/123");
+            }
 
-        List<CsvFormat> csvList = csvRepository.createCsv(uris, urisShorted);
+            List<CsvFormat> csvList = csvRepository.createCsv(uris, urisShorted);
 
-        // uses the Super CSV API to generate CSV data from the model data
-        ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(),
-                CsvPreference.STANDARD_PREFERENCE);
+            // uses the Super CSV API to generate CSV data from the model data
+            ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(),
+                    CsvPreference.STANDARD_PREFERENCE);
 
-        String[] header = {
-                "URIOriginal",
-                "URIAcortada"
-        };
+            String[] header = {
+                    "URIOriginal",
+                    "URIAcortada"
+            };
 
-        csvWriter.writeHeader(header);
+            csvWriter.writeHeader(header);
 
-        for (CsvFormat aFile: csvList) {
-            csvWriter.write(aFile, header);
+            for (CsvFormat aFile: csvList) {
+                csvWriter.write(aFile, header);
+            }
+
+            csvWriter.close();
+            return new ResponseEntity<>(HttpStatus.CREATED);
         }
-
-        csvWriter.close();
     }
 }
