@@ -51,10 +51,13 @@ public class ShortAndCheckControllerTests {
     }
 
     @Test
-    public void thatUriIsNotReachable()
-            throws Exception {
+    public void thatUriIsNotReachable() throws Exception {
         when(c.checkUri("www.prueba.com")).thenReturn(ShortAndCheckFixture.isNotReachable());
         mockMvc.perform(post("/shortAndCheck").param("uri", "www.prueba.com")).andDo(print())
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound()).andExpect(content().json("{\n" +
+                "  \"code\": 1,\n" +
+                "  \"type\": \"error\",\n" +
+                "  \"message\": \"uri inalcanzable\"\n" +
+                "}"));;
     }
 }

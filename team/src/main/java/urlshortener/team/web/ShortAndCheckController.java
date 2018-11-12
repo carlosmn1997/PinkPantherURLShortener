@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import urlshortener.team.domain.ApiResponse;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.domain.URLChecker;
 
@@ -17,10 +18,10 @@ import java.sql.Date;
 @RestController
 public class ShortAndCheckController {
 
-    URLChecker checker;
+    URLChecker checker = new URLChecker();
 
     @RequestMapping(value = "/shortAndCheck", method = RequestMethod.POST)
-    public ResponseEntity<ShortURL> shortAndCheck(@RequestParam("uri") String uri,
+    public ResponseEntity<?> shortAndCheck(@RequestParam("uri") String uri,
                                               @RequestParam(value = "sponsor", required = false) String sponsor,
                                               HttpServletRequest request)  throws Exception {
         // Comprobamos si la uri es correcta
@@ -30,7 +31,8 @@ public class ShortAndCheckController {
             return new ResponseEntity<>(su, new HttpHeaders(), HttpStatus.CREATED);
         }
         else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            ApiResponse a = new ApiResponse(1, "error", "uri inalcanzable");
+            return new ResponseEntity<>(a, new HttpHeaders(), HttpStatus.NOT_FOUND);
         }
 
     }
