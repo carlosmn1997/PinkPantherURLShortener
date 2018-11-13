@@ -49,7 +49,7 @@ public class CsvControllerTests {
 
         mockMvc.perform(multipart("/uploadCSV")
                 .file(file))
-                .andExpect(status().is(200))
+                .andExpect(status().is(201))
                 .andExpect(content().contentType("text/csv"))
                 .andDo(print());
     }

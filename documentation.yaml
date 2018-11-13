@@ -104,7 +104,7 @@ paths:
     post:
       tags:
       - "F1"
-      summary: "Envia la URI acortada que se corresponde con id a un servicio para que la convierta en QR. El sistema devuelve una imagen QR que corresponde con la URI enviada."
+      summary: "Envia la URI acortada que se corresponde con id a un servicio para que la convierta en QR. El sistema devuelve una imagen QR que corresponde con la URI enviada. Llama a una API SOAP"
       operationId: "createURIQR"
       consumes:
       - "application/json"
@@ -125,8 +125,12 @@ paths:
           description: "Servidor QR no responde"
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        400:
           description: "URI inválida"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "URI inalcanzable"
           schema:
             $ref: "#/definitions/ApiResponse"
 
@@ -228,7 +232,7 @@ paths:
         type: string
       responses:
         200:
-          description: "URI del Sponsor Asociado"
+          description: "URI del Sponsor Asociado. Si no tiene, se devuelve una URI por defecto."
           schema:
             type: string
             example: "http://www.someMockSponsor.com"
