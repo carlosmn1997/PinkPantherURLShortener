@@ -63,10 +63,12 @@ paths:
         type: string
 
       responses:
-        404:
-          description: "Not found"
         201:
           description: "URI creada correctamente"
+          schema:
+            $ref: "#/definitions/ShortenerResponse"
+        404:
+          description: "Not found"
           schema:
             $ref: "#/definitions/ApiResponse"
         405:
