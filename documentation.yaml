@@ -24,14 +24,22 @@ tags:
       | ------- | -------- |
       | http://midomino.com | http://recortada/123 |
       | http://mirecurso.com | http://recortada/321 |
+
+    - **Secuencia de ejecución**:
+        1. Invocar a /uploadCSV
+        2. Una vez se haya subido el fichero, se devolverá un identificador de tarea id.
+        3. Se llama periodicamente a /job/{id} para comprobar el estado de la tarea.
+        4. Una vez la tarea finalice /job/{id} le devolverá el identificador de la tarea acabada.
+        5. Se invoca a /result/{id} para obtener el fichero CSV con los resultados.
 - name: "F4"
   description: "Servicio de obtención de información sobre el sistema"
 - name: "F5"
   description: |
     Servicio de creación de intersiciales de publicidad en las redirecciones. Primero se devuelve el sponsor y pasado un tiempo se devuelve la URI original. La implementación es con **webSockets**
     - **Secuencia de ejecución**:
-        1. Ejecutar /sponsor/{id}
-        2. Ejecutar /{id}
+        1. Ejecutar /{id}
+        2. En el caso en el que haya sponsor, se redirige a un HTML con JavaScript.
+        3. El JavaScript invoca a /resolve/{id} y redirige a la URI asociada a la acortada
 - name: "F6"
   description: "Servicio que devuelve la URI asociada a la acortada"
 - name: "F7"
@@ -58,6 +66,11 @@ paths:
         required: true
         type: string
       - in: query
+        name: "periodicity"
+        description: "Se desea comprobacion periodica del estado"
+        required: true
+        type: boolean
+      - in: query
         name: "sponsor"
         description: "URI del sponsor"
         type: string
@@ -67,20 +80,37 @@ paths:
           description: "URI creada correctamente"
           schema:
             $ref: "#/definitions/ShortenerResponse"
-        404:
-          description: "Not found"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        405:
+        400:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
   /{id}:
+    options:
+      tags:
+      - "F6"
+      summary: |
+        Devuelve las operaciones permitidas con la URI identificada por id.
+      operationId: "optionsURI"
+      produces:
+      - "application/json"
+      parameters:
+      - in: path
+        name: "id"
+        description: "id URI acortada"
+        type: "string"
+        required: true
+      responses:
+        200:
+          description: "Devuelve los metodos permitidos para la URI con identificador id."
+          schema:
+            $ref: "#/definitions/optionsUri"
+
     get:
       tags:
       - "F6"
       - "F5"
-      summary: "Servicio que devuelve la URI asociada a la URI acortada"
+      summary: |
+        Servicio que redirige a la URI asociada a la URI acortada. Si la URI tiene sponsor, entonces devuelve la URI del sponsor un HTML con JavaScript que conecta con /resolve/{id} para que al cabo de cierto tiempo rediriga a la URI asociada.
       operationId: "returnURI"
       parameters:
       - in: path
@@ -90,28 +120,49 @@ paths:
         required: true
       responses:
         307:
-          description: "URI alcanzable"
-          schema:
-            $ref: "#/definitions/AcortarUri"
-        200:
-          description: "URI alcanzable"
-          schema:
-            $ref: "#/definitions/AcortarUri"
+          description: "Redireccionamiento correcto"
         404:
           description: "URI no alcanzable"
           schema:
             $ref: "#/definitions/ApiResponse"
 
+  /resolve/{id}:
+    get:
+      tags:
+      - "F5"
+      summary: |
+        Redirige a la URI original una vez haya pasado el tiempo indicado.
+      operationId: "resolveURI"
+      parameters:
+      - in: path
+        name: "id"
+        description: "id trabajo de resolución"
+        type: "string"
+        required: true
+      responses:
+        200:
+          description: "tiempo restante en milisegundos para desbloquear el redireccionamiento"
+          schema:
+            type: "object"
+            properties:
+              remainingTime:
+                type: "string"
+                example: 3250
+        307:
+          description: "Redireccionamiento correcto"
+        404:
+          description: "URI no alcanzable"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+
+
   /QR/{id}:
-    post:
+    put:
       tags:
       - "F1"
-      summary: "Envia la URI acortada que se corresponde con id a un servicio para que la convierta en QR. El sistema devuelve una imagen QR que corresponde con la URI enviada. Llama a una API SOAP"
+      summary: |
+        Crea la imagen QR asociada a la URI con el identificador asociado. Internamente se llama a una API SOAP.
       operationId: "createURIQR"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
       parameters:
       - in: path
         name: "id"
@@ -120,9 +171,7 @@ paths:
         required: true
       responses:
         201:
-          description: "URI correcta"
-          schema:
-            $ref: "#/definitions/ApiQRResponse"
+          description: "Imagen QR creada correctamente"
         502:
           description: "Servidor QR no responde"
           schema:
@@ -131,44 +180,27 @@ paths:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
+    get:
+      tags:
+      - "F1"
+      summary: |
+        Devuelve la imagen QR asociada a la URI acortada.
+      operationId: "readURIQR"
+      produces:
+      - "image/png"
+      parameters:
+      - in: path
+        name: "id"
+        description: "Identificador de la URI cuyo código QR ha sido creado."
+        type: "string"
+        required: true
+      responses:
+        200:
+          description: "Imagen QR"
+          schema:
+            type: file
         404:
           description: "URI inalcanzable"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-
-  /shortAndCheck:
-    post:
-      tags:
-      - "F2"
-      - "F1"
-      - "F3"
-      summary: "El servicio comprueba que la URI es alcanzable, devolviendo una URI acortada asociada en caso de que lo sea."
-      operationId: "checkAndCreateUri"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: query
-        name: "uri"
-        description: "URI a recortar"
-        required: true
-        type: string
-      - in: query
-        name: "sponsor"
-        description: "URI del sponsor"
-        type: string
-      responses:
-        201:
-          description: "URI creada"
-          schema:
-            $ref: "#/definitions/ShortenerResponse"
-        404:
-          description: "URI no alcanzable"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        405:
-          description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
 
@@ -179,20 +211,65 @@ paths:
       summary: "Servicio que acorta todas las URLs indicadas en un fichero CSV. El fichero debe tener una URI por fila."
       consumes:
       - multipart/form-data
-      produces:
-      - application/csv
       parameters:
       - in: formData
         name: file
         type: file
         description: "fichero csv"
+      - in: query
+        name: perodicy
+        type: boolean
+        description: "Si se desean que se verifique la disponibilidad de las URIs"
       responses:
-        201:
-          description: "URIs creadas"
+        202:
+          description: "Fichero subido, devuelve el identificador del trabajo. Se tendrá que preguntar el estado del trabajo en /job/{id}"
           schema:
-            type: file
+            type: string
+            example: 1234
         400:
           description: "Fichero CSV malformado"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+
+  /job/{id}:
+    get:
+      tags:
+      - "F3"
+      summary: |
+        Devuelve el estado del procesado de las URIs del fichero subido
+      operationId: "jobState"
+      parameters:
+      - in: path
+        name: "id"
+        description: "Estado del proceso"
+        type: "string"
+        required: true
+      responses:
+        200:
+          description: "Estado del proceso."
+          schema:
+            type: "object"
+            properties:
+              state:
+                type: "object"
+                properties:
+                  URIsProcessed:
+                    type: integer
+                    example: 25
+                  TotalURIs:
+                    type: integer
+                    example: 100
+        201:
+          description: "Fichero procesado, devuelve el identificador del resultado con el que se debe preguntar a result/{id}"
+          schema:
+            type: string
+            example: 4321
+        502:
+          description: "Servidor QR no responde"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        400:
+          description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
         404:
@@ -204,11 +281,36 @@ paths:
           schema:
             $ref: "#/definitions/ApiResponse"
 
+  /result/{id}:
+    get:
+      tags:
+      - "F3"
+      summary: |
+        Devuelve el fichero CSV resultante de haber procesado las URIs.
+      operationId: "jobResult"
+      produces:
+      - application/csv
+      parameters:
+      - in: path
+        name: "id"
+        description: "Identificador del recurso"
+        type: "string"
+        required: true
+      responses:
+        200:
+          description: "Fichero resultado con las URIs procesadas"
+          schema:
+            type: file
+        404:
+          description: "Recurso no encontrado"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+
   /stats:
     get:
       tags:
       - "F4"
-      summary: "El servicio devuelve estadísticas de uso y carga del sistema."
+      summary: "El servicio devuelve estadísticas globales de uso y carga del sistema."
       operationId: "systemStats"
       produces:
       - "application/json"
@@ -217,35 +319,25 @@ paths:
           description: "Info. sistema"
           schema:
             $ref: "#/definitions/ApiStatsResponse"
-
-  /sponsor/{id}:
+  /stats/{id}:
     get:
       tags:
-      - "F5"
-      summary: "El servicio devuelve en primer lugar la URI de la web a mostrar su publicidad y pasado un tiempo invoca a F1"
-      operationId: "advertising"
+      - "F4"
+      summary: "El servicio devuelve estadísticas de uso de la URI con identificador id"
+      operationId: "uriStats"
       produces:
-      - "text/plain"
+      - "application/json"
       parameters:
       - in: path
-        name: id
-        description: "identificador de la URI acortada"
+        name: "id"
+        description: "Identificador del recurso"
+        type: "string"
         required: true
-        type: string
       responses:
         200:
-          description: "URI del Sponsor Asociado. Si no tiene, se devuelve una URI por defecto."
+          description: "Info. sistema"
           schema:
-            type: string
-            example: "http://www.someMockSponsor.com"
-        404:
-          description: "URI no alcanzable"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        405:
-          description: "URI inválida"
-          schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiStatsResponse"
 
 definitions:
   AcortarUri:
@@ -319,3 +411,8 @@ definitions:
         type: "string"
       country:
         type: "string"
+  optionsUri:
+    type: "object"
+    properties:
+      getSupported:
+        type: boolean
