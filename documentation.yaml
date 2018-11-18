@@ -84,16 +84,12 @@ paths:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
-        502:
-          description: "URI inalcanzable"
-          schema:
-            $ref: "#/definitions/ApiResponse"
   /{id}:
     options:
       tags:
       - "F6"
       summary: |
-        Devuelve las operaciones permitidas con la URI identificada por id.
+        Devuelve las operaciones permitidas con la URI identificada por id en el caso en el que siga activa. Esta operacion no funciona si no se ha indicado que la URI se compruebe periodicamente.
       operationId: "optionsURI"
       produces:
       - "application/json"
@@ -108,6 +104,10 @@ paths:
           description: "Devuelve los metodos permitidos para la URI con identificador id."
           schema:
             $ref: "#/definitions/optionsUri"
+        400:
+          description: "La URI no se comprueba periódicamente"
+          schema:
+            $ref: "#/definitions/ApiResponse"
 
     get:
       tags:
@@ -269,18 +269,10 @@ paths:
             type: string
             example: 4321
         502:
-          description: "Servidor QR no responde"
+          description: "Uri no alcanzable"
           schema:
             $ref: "#/definitions/ApiResponse"
         400:
-          description: "URI inválida"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        404:
-          description: "URI no alcanzable"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        405:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -362,18 +354,6 @@ definitions:
       type:
         type: "string"
       message:
-        type: "string"
-  ApiSponsorResponse:
-    type: "object"
-    properties:
-      slug:
-        type: "string"
-      uri:
-        type: "string"
-  ApiQRResponse:
-    type: "object"
-    properties:
-      uri:
         type: "string"
   ApiStatsResponse:
     type: "object"
