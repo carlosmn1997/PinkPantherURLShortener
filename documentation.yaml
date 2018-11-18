@@ -125,7 +125,7 @@ paths:
       responses:
         307:
           description: "Redireccionamiento correcto"
-        404:
+        502:
           description: "URI no alcanzable"
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -154,7 +154,7 @@ paths:
                 example: 3250
         307:
           description: "Redireccionamiento correcto"
-        404:
+        502:
           description: "URI no alcanzable"
           schema:
             $ref: "#/definitions/ApiResponse"
