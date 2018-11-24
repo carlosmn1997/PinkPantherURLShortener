@@ -16,7 +16,12 @@ tags:
     1. Mediante `GET /qr/{id}` se obtendrá la imagen QR. Se devolverá 404 si dicho `id` no corresponde a una URL acortada o todavía no esta disponible la imagen. Si la imagen todavía no está disponible se notificará con `Retry-After` un tiempo prudencial para reinterar la petición.
 
 - name: "F2"
-  description: "Servicio que comprueba que una URL se puede alcanzar antes de crear una URL corta"
+  description: |
+    Servicio que comprueba que una URL se puede alcanzar antes de crear una URL corta
+    ### Secuencia de ejecución método `GET /{id}/alive`
+      1. Al crear la URI recortada mediante un `POST /short`  con el parametro `periodicity` se activa el proceso interno para verificar de forma periodica la URI
+      1. Al llamar al método `GET /{id}/alive` devuelve una JSON indicando el estado de la URI
+      1. Si no se había creado la URI con la funcionalidad `periodicity` el método `GET /{id}/alive` devuelve 404.
 - name: "F3"
   description: |
     Servicio que permite subir un CSV con todas las URI que se desean acortar y que devuelve un CSV con que contiene para cada URI su URI acortada.
@@ -38,7 +43,8 @@ tags:
         4. Una vez la tarea finalice /job/{id} le devolverá el identificador de la tarea acabada.
         5. Se invoca a /result/{id} para obtener el fichero CSV con los resultados.
 - name: "F4"
-  description: "Servicio de obtención de información sobre el sistema"
+  description: |
+    Servicio de obtención de información sobre el sistema
 - name: "F5"
   description: |
     Servicio de creación de intersiciales de publicidad en las redirecciones. Primero se devuelve el sponsor y pasado un tiempo se devuelve la URI original. La implementación es con **webSockets**
@@ -79,6 +85,11 @@ paths:
         required: true
         type: boolean
       - in: query
+        name: "qr"
+        description: "Se desea creación de imagen QR"
+        type: boolean
+        required: true
+      - in: query
         name: "sponsor"
         description: "URI del sponsor"
         type: string
@@ -95,30 +106,6 @@ paths:
             $ref: "#/definitions/ApiResponse"
         502:
           description: "URI inalcanzable"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-  /{id}:
-    options:
-      tags:
-      - "F6"
-      summary: |
-        Devuelve las operaciones permitidas con la URI identificada por id en el caso en el que siga activa. Esta operacion no funciona si no se ha indicado que la URI se compruebe periodicamente.
-      operationId: "optionsURI"
-      produces:
-      - "application/json"
-      parameters:
-      - in: path
-        name: "id"
-        description: "id URI acortada"
-        type: "string"
-        required: true
-      responses:
-        200:
-          description: "Devuelve los metodos permitidos para la URI con identificador id."
-          schema:
-            $ref: "#/definitions/optionsUri"
-        400:
-          description: "La URI no se comprueba periódicamente"
           schema:
             $ref: "#/definitions/ApiResponse"
 
@@ -173,30 +160,7 @@ paths:
             $ref: "#/definitions/ApiResponse"
 
 
-  /QR/{id}:
-    put:
-      tags:
-      - "F1"
-      summary: |
-        Crea la imagen QR asociada a la URI con el identificador asociado. Internamente se llama a una API SOAP.
-      operationId: "createURIQR"
-      parameters:
-      - in: path
-        name: "id"
-        description: "URI recortada previamente"
-        type: "string"
-        required: true
-      responses:
-        201:
-          description: "Imagen QR creada correctamente"
-        502:
-          description: "Servidor QR no responde"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        400:
-          description: "URI inválida"
-          schema:
-            $ref: "#/definitions/ApiResponse"
+  /{id}/qr:
     get:
       tags:
       - "F1"
@@ -220,6 +184,7 @@ paths:
           description: "URI inalcanzable"
           schema:
             $ref: "#/definitions/ApiResponse"
+
 
   /uploadCSV:
     post:
@@ -328,7 +293,7 @@ paths:
           description: "Info. sistema"
           schema:
             $ref: "#/definitions/ApiStatsResponse"
-  /stats/{id}:
+  /{id}/info:
     get:
       tags:
       - "F4"
@@ -347,6 +312,32 @@ paths:
           description: "Info. sistema"
           schema:
             $ref: "#/definitions/ApiStatsResponse"
+
+  /{id}/alive:
+    get:
+      tags:
+      - "F4"
+      - "F2"
+      summary: |
+        Devuelve un JSON que indica si la URI es alcanzable o no. Si no se deseaba periodiciad el método devuelve 404.
+      operationId: "uriStatsAlive"
+      produces:
+      - "application/json"
+      parameters:
+      - in: path
+        name: "id"
+        description: "Identificador del recurso"
+        type: "string"
+        required: true
+      responses:
+        200:
+          description: "URI alcanzable o no"
+          schema:
+            $ref: "#/definitions/aliveUri"
+        400:
+          description: "La URI no se comprueba periódicamente"
+          schema:
+            $ref: "#/definitions/ApiResponse"
 
 definitions:
   ApiResponse:
@@ -400,8 +391,9 @@ definitions:
         type: "string"
       country:
         type: "string"
-  optionsUri:
+  aliveUri:
     type: "object"
     properties:
-      getSupported:
+      alive:
         type: boolean
+        example: true
