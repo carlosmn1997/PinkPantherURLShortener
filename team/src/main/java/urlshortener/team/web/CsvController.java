@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import urlshortener.team.domain.Click;
@@ -40,6 +41,8 @@ import org.supercsv.prefs.CsvPreference;
 @RestController
 public class CsvController {
 
+    private static int id = 0;
+
 	@Autowired
 	protected CsvRepository csvRepository;
 
@@ -48,10 +51,10 @@ public class CsvController {
     protected JobRepository jobRepository;
 
 
-    @RequestMapping(value = "/uploadCSV", method = RequestMethod.GET)
-    public ResponseEntity<String> downloadCSV(HttpServletResponse response, //@RequestParam("file") MultipartFile file,
+    @RequestMapping(value = "/uploadCSV", method = RequestMethod.POST)
+    public ResponseEntity<String> downloadCSV(HttpServletResponse response, @RequestParam("file") MultipartFile file,
                             HttpServletRequest request) throws IOException {
-        MultipartFile file = null;
+        //MultipartFile file = null;
 
         String csvFileName = "mock.csv";
 
@@ -73,20 +76,22 @@ public class CsvController {
 
             // I create a new job
             // Must be async
-            List<String> urisShorted = csvRepository.shortUris(uris);
-
-            // when it has finished, create CSV
-            List<CsvFormat> csvList = csvRepository.createCsv(uris, urisShorted);
-
-            Job job = new Job("123", 0, 125, null, csvList);
-            System.out.println(job.getResult().get(0).toString());
+            int idInt = this.id++;
+            String id = Integer.toString(idInt);
+            Job job = new Job(id, 0, uris.size(), null, null);
             jobRepository.save(job);
-            Job job2 = jobRepository.findByKey(job.getHash());
+            jobRepository.processJob(job, uris); // is async
+
+
+
+            //System.out.println(job.getResult().get(0).toString());
+            //jobRepository.save(job);
+            //Job job2 = jobRepository.findByKey(job.getHash());
 
             // Finish writing CSV
             // Store csvList as a BLOB
 
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>("http://localhost:8080/job/"+id,HttpStatus.CREATED);
         }
     }
 
@@ -105,11 +110,9 @@ public class CsvController {
 
     @RequestMapping(value = "/result/{id:(?!link).*}", method = RequestMethod.GET)
     public ResponseEntity<String> job(@PathVariable String id,
-                                   HttpServletRequest request,
                                 HttpServletResponse response) throws IOException {
         Job j = jobRepository.findByKey(id);
-        if(j != null){
-            if(j.getConverted() == j.getTotal()){
+        if(j != null && j.getResult()!=null){
                 List<CsvFormat> csvList = j.getResult();
                 // uses the Super CSV API to generate CSV data from the model data
                 ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(),
@@ -127,10 +130,7 @@ public class CsvController {
                 }
 
                 csvWriter.close();
-                return new ResponseEntity<>(HttpStatus.CREATED);
-            } else {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
+                return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

@@ -1,5 +1,6 @@
 package urlshortener.team.repository;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
@@ -14,6 +15,7 @@ public interface CsvRepository {
 
     List<String> parserCsv(MultipartFile file);
 
+    @Async
     List<String> shortUris(List<String> urisToShort);
 
     // Return the location of the file
