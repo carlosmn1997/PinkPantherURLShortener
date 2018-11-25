@@ -309,9 +309,13 @@ paths:
         required: true
       responses:
         200:
-          description: "Info. sistema"
+          description: "Info. URI"
           schema:
-            $ref: "#/definitions/ApiStatsResponse"
+            $ref: "#/definitions/ApiStatsUri"
+        404:
+          description: "Recurso no encontrado"
+          schema:
+            $ref: "#/definitions/ApiResponse"
 
   /{id}/alive:
     get:
@@ -319,7 +323,7 @@ paths:
       - "F4"
       - "F2"
       summary: |
-        Devuelve un JSON que indica si la URI es alcanzable o no. Si no se deseaba periodiciad el método devuelve 404.
+        Devuelve un JSON que indica si la URI es alcanzable o no. Si no se deseaba periodiciad el método devuelve 400.
       operationId: "uriStatsAlive"
       produces:
       - "application/json"
@@ -336,6 +340,10 @@ paths:
             $ref: "#/definitions/aliveUri"
         400:
           description: "La URI no se comprueba periódicamente"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "Recurso no encontrado"
           schema:
             $ref: "#/definitions/ApiResponse"
 
@@ -362,11 +370,23 @@ definitions:
       click_number:
         type: "integer"
       time_last_redirection:
-        type: "integer"
+        type: "string"
+        format: date-time
       mem_used_mb:
         type: "integer"
       mem_available_mb:
         type: "integer"
+  ApiStatsUri:
+    type: "object"
+    properties:
+      creation_date:
+        type: "string"
+        format: date-time
+      click_number:
+        type: "integer"
+      time_last_redirection:
+        type: "string"
+        format: date-time
   ShortenerResponse:
     type: "object"
     properties:
