@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import urlshortener.team.domain.Click;
 import urlshortener.team.domain.CsvFormat;
+import urlshortener.team.domain.Job;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.CsvRepository;
+import urlshortener.team.repository.JobRepository;
 import urlshortener.team.repository.ShortURLRepository;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,13 +43,15 @@ public class CsvController {
 	@Autowired
 	protected CsvRepository csvRepository;
 
+
 	@Autowired
-	protected ClickRepository clickRepository;
+    protected JobRepository jobRepository;
 
 
-    @RequestMapping(value = "/uploadCSV", method = RequestMethod.POST)
-    public ResponseEntity<String> downloadCSV(HttpServletResponse response, @RequestParam("file") MultipartFile file,
+    @RequestMapping(value = "/uploadCSV", method = RequestMethod.GET)
+    public ResponseEntity<String> downloadCSV(HttpServletResponse response, //@RequestParam("file") MultipartFile file,
                             HttpServletRequest request) throws IOException {
+        MultipartFile file = null;
 
         String csvFileName = "mock.csv";
 
@@ -66,32 +70,69 @@ public class CsvController {
                     .body("Fichero CSV mal formado");
         }
         else{
-            List<String> urisShorted = new ArrayList<>();
-            for(String uri : uris){
-                // Shortening uri
-                // ...
-                urisShorted.add("http://localhostMock:8080/123");
-            }
 
+            // I create a new job
+            // Must be async
+            List<String> urisShorted = csvRepository.shortUris(uris);
+
+            // when it has finished, create CSV
             List<CsvFormat> csvList = csvRepository.createCsv(uris, urisShorted);
 
-            // uses the Super CSV API to generate CSV data from the model data
-            ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(),
-                    CsvPreference.STANDARD_PREFERENCE);
+            Job job = new Job("123", 0, 125, null, csvList);
+            System.out.println(job.getResult().get(0).toString());
+            jobRepository.save(job);
+            Job job2 = jobRepository.findByKey(job.getHash());
 
-            String[] header = {
-                    "URIOriginal",
-                    "URIAcortada"
-            };
+            // Finish writing CSV
+            // Store csvList as a BLOB
 
-            csvWriter.writeHeader(header);
-
-            for (CsvFormat aFile: csvList) {
-                csvWriter.write(aFile, header);
-            }
-
-            csvWriter.close();
             return new ResponseEntity<>(HttpStatus.CREATED);
+        }
+    }
+
+    @RequestMapping(value = "/job/{id:(?!link).*}", method = RequestMethod.GET)
+    public ResponseEntity<Job> job(@PathVariable String id,
+                                        HttpServletRequest request) {
+        Job j = jobRepository.findByKey(id);
+        if(j != null){
+            HttpHeaders h = new HttpHeaders();
+            h.setLocation(j.getUriResult());
+            return new ResponseEntity<>(j, h, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(value = "/result/{id:(?!link).*}", method = RequestMethod.GET)
+    public ResponseEntity<String> job(@PathVariable String id,
+                                   HttpServletRequest request,
+                                HttpServletResponse response) throws IOException {
+        Job j = jobRepository.findByKey(id);
+        if(j != null){
+            if(j.getConverted() == j.getTotal()){
+                List<CsvFormat> csvList = j.getResult();
+                // uses the Super CSV API to generate CSV data from the model data
+                ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(),
+                        CsvPreference.STANDARD_PREFERENCE);
+
+                String[] header = {
+                        "URIOriginal",
+                        "URIAcortada"
+                };
+
+                csvWriter.writeHeader(header);
+
+                for (CsvFormat aFile: csvList) {
+                    csvWriter.write(aFile, header);
+                }
+
+                csvWriter.close();
+                return new ResponseEntity<>(HttpStatus.CREATED);
+            } else {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 }

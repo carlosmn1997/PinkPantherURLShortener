@@ -5,10 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import urlshortener.team.repository.ClickRepository;
-import urlshortener.team.repository.ClickRepositoryImpl;
-import urlshortener.team.repository.ShortURLRepository;
-import urlshortener.team.repository.ShortURLRepositoryImpl;
+import urlshortener.team.repository.*;
 
 @Configuration
 public class PersistenceContext {
@@ -25,5 +22,8 @@ public class PersistenceContext {
 	ClickRepository clickRepository() {
 		return new ClickRepositoryImpl(jdbc);
 	}
+
+	@Bean
+	JobRepository jobRepository() { return new JobRepositoryImpl(jdbc); }
 	
 }

@@ -1,6 +1,8 @@
 package urlshortener.team.domain;
 
-public class CsvFormat {
+import java.io.Serializable;
+
+public class CsvFormat implements Serializable {
     private String URIOriginal;
     private String URIAcortada;
 
@@ -19,6 +21,14 @@ public class CsvFormat {
 
     public String getURIAcortada() {
         return URIAcortada;
+    }
+
+    @Override
+    public String toString() {
+        return "CsvFormat{" +
+                "URIOriginal='" + URIOriginal + '\'' +
+                ", URIAcortada='" + URIAcortada + '\'' +
+                '}';
     }
 
     public void setURIAcortada(String URIAcortada) {
