@@ -198,10 +198,6 @@ paths:
         name: file
         type: file
         description: "fichero csv"
-      - in: query
-        name: perodicy
-        type: boolean
-        description: "Si se desean que se verifique la disponibilidad de las URIs"
       responses:
         202:
           description: "Fichero subido, devuelve el identificador del trabajo. Se tendrá que preguntar el estado del trabajo en /job/{id}"
@@ -309,13 +305,9 @@ paths:
         required: true
       responses:
         200:
-          description: "Info. URI"
+          description: "Info. sistema"
           schema:
-            $ref: "#/definitions/ApiStatsUri"
-        404:
-          description: "Recurso no encontrado"
-          schema:
-            $ref: "#/definitions/ApiResponse"
+            $ref: "#/definitions/ApiStatsResponse"
 
   /{id}/alive:
     get:
@@ -323,7 +315,7 @@ paths:
       - "F4"
       - "F2"
       summary: |
-        Devuelve un JSON que indica si la URI es alcanzable o no. Si no se deseaba periodiciad el método devuelve 400.
+        Devuelve un JSON que indica si la URI es alcanzable o no. Si no se deseaba periodiciad el método devuelve 404.
       operationId: "uriStatsAlive"
       produces:
       - "application/json"
@@ -340,10 +332,6 @@ paths:
             $ref: "#/definitions/aliveUri"
         400:
           description: "La URI no se comprueba periódicamente"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        404:
-          description: "Recurso no encontrado"
           schema:
             $ref: "#/definitions/ApiResponse"
 
@@ -370,23 +358,11 @@ definitions:
       click_number:
         type: "integer"
       time_last_redirection:
-        type: "string"
-        format: date-time
+        type: "integer"
       mem_used_mb:
         type: "integer"
       mem_available_mb:
         type: "integer"
-  ApiStatsUri:
-    type: "object"
-    properties:
-      creation_date:
-        type: "string"
-        format: date-time
-      click_number:
-        type: "integer"
-      time_last_redirection:
-        type: "string"
-        format: date-time
   ShortenerResponse:
     type: "object"
     properties:
