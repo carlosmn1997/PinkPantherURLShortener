@@ -54,17 +54,6 @@ public class CsvController {
     @RequestMapping(value = "/uploadCSV", method = RequestMethod.POST)
     public ResponseEntity<String> downloadCSV(HttpServletResponse response, @RequestParam("file") MultipartFile file,
                             HttpServletRequest request) throws IOException {
-        //MultipartFile file = null;
-
-        String csvFileName = "mock.csv";
-
-        response.setContentType("text/csv");
-
-        // creates mock data
-        String headerKey = "Content-Disposition";
-        String headerValue = String.format("attachment; filename=\"%s\"",
-                csvFileName);
-        response.setHeader(headerKey, headerValue);
 
         List<String> uris = csvRepository.parserCsv(file);
         if(uris == null){
@@ -73,10 +62,9 @@ public class CsvController {
                     .body("Fichero CSV mal formado");
         }
         else{
-
-            // I create a new job
+            // It creates a new job
             // Must be async
-            int idInt = this.id++;
+            int idInt = this.id++; // job id
             String id = Integer.toString(idInt);
             Job job = new Job(id, 0, uris.size(), null, null);
             jobRepository.save(job);
@@ -97,7 +85,7 @@ public class CsvController {
 
     @RequestMapping(value = "/job/{id:(?!link).*}", method = RequestMethod.GET)
     public ResponseEntity<Job> job(@PathVariable String id,
-                                        HttpServletRequest request) {
+                                         HttpServletResponse response) throws IOException {
         Job j = jobRepository.findByKey(id);
         if(j != null){
             HttpHeaders h = new HttpHeaders();
@@ -109,10 +97,20 @@ public class CsvController {
     }
 
     @RequestMapping(value = "/result/{id:(?!link).*}", method = RequestMethod.GET)
-    public ResponseEntity<String> job(@PathVariable String id,
+    public ResponseEntity<String> result(@PathVariable String id,
                                 HttpServletResponse response) throws IOException {
         Job j = jobRepository.findByKey(id);
         if(j != null && j.getResult()!=null){
+            String csvFileName = "mock.csv";
+
+            response.setContentType("text/csv");
+
+            // creates mock data
+            String headerKey = "Content-Disposition";
+            String headerValue = String.format("attachment; filename=\"%s\"",
+                    csvFileName);
+            response.setHeader(headerKey, headerValue);
+
                 List<CsvFormat> csvList = j.getResult();
                 // uses the Super CSV API to generate CSV data from the model data
                 ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(),
