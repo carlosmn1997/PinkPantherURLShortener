@@ -7,21 +7,30 @@ import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
 import urlshortener.team.domain.CsvFormat;
 
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 public class CsvRepositoryImpl implements CsvRepository {
     @Override
-    public List<String> parserCsv(MultipartFile file) {
-        List<String> list = new ArrayList<>();
-        list.add("http://uri1.com");
-        list.add("http://uri2.com");
-        list.add("http://uri3.com");
-        list.add("http://uri4.com");
-        list.add("http://uri5.com");
-        return list;
+    public List<String> parserCsv(MultipartFile multipart) {
+        BufferedReader br;
+        List<String> result = new ArrayList<>();
+        try {
+
+            String line;
+            InputStream is = multipart.getInputStream();
+            br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                // TODO asegurarse de que es una URI...
+                result.add(line);
+            }
+
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+        return result;
     }
 
     @Override

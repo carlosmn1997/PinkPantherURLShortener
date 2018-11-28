@@ -124,7 +124,7 @@ public class JobRepositoryImpl implements JobRepository{
             job.setConverted(job.getConverted()+1);
             update(job);
             try{
-                TimeUnit.SECONDS.sleep(10);
+                TimeUnit.SECONDS.sleep(5);
             } catch (Exception e){
                 e.printStackTrace();
             }
