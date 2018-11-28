@@ -8,7 +8,6 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -24,7 +23,8 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
             null, rs.getString("sponsor"), rs.getDate("created"),
             rs.getString("owner"), rs.getInt("mode"),
             rs.getBoolean("safe"), rs.getString("ip"),
-            rs.getString("country"));
+            rs.getString("country"), rs.getBoolean("checkStatus"),
+			rs.getBoolean("aliveOnLastCheck"));
 
 	private JdbcTemplate jdbc;
 
@@ -46,10 +46,10 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
 	@Override
 	public ShortURL save(ShortURL su) {
 		try {
-			jdbc.update("INSERT INTO shorturl VALUES (?,?,?,?,?,?,?,?,?)",
+			jdbc.update("INSERT INTO shorturl VALUES (?,?,?,?,?,?,?,?,?,?,?)",
 					su.getHash(), su.getTarget(), su.getSponsor(),
 					su.getCreated(), su.getOwner(), su.getMode(), su.getSafe(),
-					su.getIP(), su.getCountry());
+					su.getIP(), su.getCountry(), su.isCheckStatus(), su.isAliveOnLastCheck());
 		} catch (DuplicateKeyException e) {
 			log.debug("When insert for key {}",  su.getHash(), e);
 			return su;
@@ -78,8 +78,10 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
 	@Override
 	public void update(ShortURL su) {
 		try {
+		    String check = (su.isCheckStatus()) ? "TRUE" : "FALSE";
+            String alive = (su.isAliveOnLastCheck()) ? "TRUE" : "FALSE";
 			jdbc.update(
-					"update shorturl set target=?, sponsor=?, created=?, owner=?, mode=?, safe=?, ip=?, country=? where hash=?",
+					"update shorturl set target=?, sponsor=?, created=?, owner=?, mode=?, safe=?, ip=?, country=?, CHECKSTATUS="+ check +", ALIVEONLASTCHECK="+ alive +" where hash=?",
 					su.getTarget(), su.getSponsor(), su.getCreated(),
 					su.getOwner(), su.getMode(), su.getSafe(), su.getIP(),
 					su.getCountry(), su.getHash());
@@ -126,6 +128,17 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
 					new Object[] { target }, rowMapper);
 		} catch (Exception e) {
 			log.debug("When select for target " + target , e);
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
+	public List<ShortURL> getAllToCheck() {
+		try {
+			return jdbc.query("select * from shorturl where checkstatus=true",
+					new Object[] {}, rowMapper);
+		} catch (Exception e) {
+			log.debug("When counting", e);
 			return Collections.emptyList();
 		}
 	}
