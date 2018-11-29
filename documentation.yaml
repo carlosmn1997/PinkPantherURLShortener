@@ -305,9 +305,13 @@ paths:
         required: true
       responses:
         200:
-          description: "Info. sistema"
+          description: "Info. URI"
           schema:
-            $ref: "#/definitions/ApiStatsResponse"
+            $ref: "#/definitions/ApiStatsUri"
+        404:
+          description: "Recurso no encontrado"
+          schema:
+            $ref: "#/definitions/ApiResponse"
 
   /{id}/alive:
     get:
@@ -363,6 +367,17 @@ definitions:
         type: "integer"
       mem_available_mb:
         type: "integer"
+  ApiStatsUri:
+    type: "object"
+    properties:
+      creation_date:
+        type: "string"
+        format: date
+      click_number:
+        type: "integer"
+      time_last_redirection:
+        type: "string"
+        format: date-time
   ShortenerResponse:
     type: "object"
     properties:
