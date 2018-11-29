@@ -362,7 +362,8 @@ definitions:
       click_number:
         type: "integer"
       time_last_redirection:
-        type: "integer"
+        type: "string"
+        format: date-time
       mem_used_mb:
         type: "integer"
       mem_available_mb:
