@@ -126,7 +126,17 @@ public class ShortURLRepositoryTests {
 		su = repository.findByKey(ShortURLFixture.url1().getHash());
 		assertEquals(su.getTarget(), "http://www.unizar.org/");
 	}
-	
+
+	@Test
+	public void thatGetAllToCheckReturnsOnlyRedirectsWithCheckStatus() {
+		for(ShortURL i : ShortURLFixture.someURLs()) {
+			repository.save(i);
+		}
+		for(ShortURL i : repository.getAllToCheck()) {
+			assertEquals(i.isCheckStatus(), true);
+		}
+	}
+
 	@After
 	public void shutdown() {
 		db.shutdown();

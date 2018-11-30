@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.ShortURLRepository;
-import urlshortener.team.web.UrlShortenerController;
 import urlshortener.team.web.fixture.ShortURLFixture;
 
 import static org.hamcrest.Matchers.is;
@@ -67,7 +66,9 @@ public class UrlShortenerTests {
     public void thatShortenerCreatesARedirectIfTheURLisOK() throws Exception {
         configureTransparentSave();
 
-        mockMvc.perform(post("/short").param("uri", "http://example.com/"))
+        mockMvc.perform(post("/short").param("uri", "http://example.com/")
+                .param("periodicity", "true")
+                .param("qr", "false"))
                 .andDo(print())
                 .andExpect(redirectedUrl("http://localhost/f684a3c4"))
                 .andExpect(status().isCreated())
@@ -83,7 +84,9 @@ public class UrlShortenerTests {
 
         mockMvc.perform(
                 post("/short").param("uri", "http://example.com/").param(
-                        "sponsor", "http://sponsor.com/")).andDo(print())
+                        "sponsor", "http://sponsor.com/")
+                        .param("periodicity", "true")
+                        .param("qr", "false")).andDo(print())
                 .andExpect(redirectedUrl("http://localhost/f684a3c4"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.hash", is("f684a3c4")))
@@ -96,7 +99,9 @@ public class UrlShortenerTests {
     public void thatShortenerFailsIfTheURLisWrong() throws Exception {
         configureTransparentSave();
 
-        mockMvc.perform(post("/short").param("uri", "someKey")).andDo(print())
+        mockMvc.perform(post("/short").param("uri", "someKey")
+                .param("periodicity", "true")
+                .param("qr", "false")).andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
@@ -104,9 +109,53 @@ public class UrlShortenerTests {
     public void thatShortenerFailsIfTheRepositoryReturnsNull() throws Exception {
         when(shortURLRepository.save(any(ShortURL.class)))
                 .thenReturn(null);
-
-        mockMvc.perform(post("/short").param("uri", "someKey")).andDo(print())
+        mockMvc.perform(post("/short").param("uri", "someKey")
+                .param("periodicity", "true")
+                .param("qr", "false")).andDo(print())
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void thatCheckStatusIsTrueIfPeriodicityIsTrue() throws Exception {
+        configureTransparentSave();
+
+        mockMvc.perform(post("/short").param("uri", "http://example.com/")
+                .param("periodicity", "true")
+                .param("qr", "false"))
+                .andDo(print())
+                .andExpect(jsonPath("$.checkStatus", is(true)));
+    }
+
+    @Test
+    public void thatCheckStatusIsFalseIfPeriodicityIsFalse() throws Exception {
+        configureTransparentSave();
+
+        mockMvc.perform(post("/short").param("uri", "http://example.com/")
+                .param("periodicity", "false")
+                .param("qr", "false"))
+                .andDo(print())
+                .andExpect(jsonPath("$.checkStatus", is(false)));
+    }
+
+    @Test
+    public void thatAliveIsOkIfPeriodicityWasTrue() throws Exception {
+        when(shortURLRepository.findByKey(any(String.class))).thenReturn(ShortURLFixture.urlPeriodicity());
+        mockMvc.perform(get("/{id}/alive", "someKey")).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void thatAliveFailsIfPeriodicityWasFalse() throws Exception {
+        when(shortURLRepository.findByKey(any(String.class))).thenReturn(ShortURLFixture.urlNotPeriodicity());
+        mockMvc.perform(get("/{id}/alive", "someKey")).andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void thatAliveFailsIfIdKeyDoesNotExist() throws Exception {
+        when(shortURLRepository.findByKey(any(String.class))).thenReturn(null);
+        mockMvc.perform(get("/{id}/alive", "someKey")).andDo(print())
+                .andExpect(status().isNotFound());
     }
 
     private void configureTransparentSave() {
