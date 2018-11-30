@@ -15,6 +15,8 @@ CREATE TABLE SHORTURL(
 	MODE		INTEGER,					-- Redirect mode
 	SAFE		BOOLEAN,						-- Safe target
 	IP			VARCHAR(20),				-- IP
+	QRIMAGE   BLOB,
+	QR      BOOLEAN,
 	COUNTRY		VARCHAR(50)					-- Country
 );
 

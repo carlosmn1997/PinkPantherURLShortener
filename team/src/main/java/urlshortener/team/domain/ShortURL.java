@@ -17,6 +17,8 @@ public class ShortURL {
 	private String country;
 	private Boolean checkStatus;
 	private Boolean aliveOnLastCheck;
+	private Boolean qr;
+	private byte[] qrImage;
 
 	public ShortURL(String hash, String target, URI uri, String sponsor,
 					Date created, String owner, Integer mode, Boolean safe,
@@ -33,6 +35,26 @@ public class ShortURL {
 		this.country = country;
 		this.checkStatus = checkStatus;
 		this.aliveOnLastCheck = aliveOnLastCheck;
+	}
+
+	public ShortURL(String hash, String target, URI uri, String sponsor,
+					Date created, String owner, Integer mode, Boolean safe,
+					String ip, String country, Boolean checkStatus, Boolean aliveOnLastCheck,
+					Boolean qr, byte[] qrImage) {
+		this.hash = hash;
+		this.target = target;
+		this.uri = uri;
+		this.sponsor = sponsor;
+		this.created = created;
+		this.owner = owner;
+		this.mode = mode;
+		this.safe = safe;
+		this.ip = ip;
+		this.country = country;
+		this.checkStatus = checkStatus;
+		this.aliveOnLastCheck = aliveOnLastCheck;
+		this.qr=qr;
+		this.qrImage=qrImage;
 	}
 
 	public ShortURL() {}
@@ -125,11 +147,23 @@ public class ShortURL {
 		this.checkStatus = checkStatus;
 	}
 
-	public Boolean isAliveOnLastCheck() {
-		return aliveOnLastCheck;
+	public Boolean getQR() {
+		return qr;
 	}
 
-	public void setAliveOnLastCheck(Boolean aliveOnLastCheck) {
-		this.aliveOnLastCheck = aliveOnLastCheck;
+	public void setQr(Boolean qr) {
+		this.qr = qr;
 	}
+
+	public byte[] getQRimage() {
+		return qrImage;
+	}
+
+	public void setQrImage(byte[] qrImage) {
+		this.qrImage = qrImage;
+	}
+
+	public boolean isAliveOnLastCheck(){ return this.aliveOnLastCheck;}
+
+	public void setAliveOnLastCheck(boolean b){ this.aliveOnLastCheck = b; }
 }
