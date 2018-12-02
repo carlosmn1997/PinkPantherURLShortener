@@ -33,7 +33,7 @@ public class UrlShortenerController {
 	@Autowired
 	protected ClickRepository clickRepository;
 
-	@RequestMapping(value = "/{id:(?!link).*}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{id:(?!link|index).*}", method = RequestMethod.GET)
 	public ResponseEntity<?> redirectTo(@PathVariable String id,
 			HttpServletRequest request) {
 		ShortURL l = shortURLRepository.findByKey(id);

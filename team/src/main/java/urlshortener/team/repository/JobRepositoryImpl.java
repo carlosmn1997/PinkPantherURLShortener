@@ -1,10 +1,14 @@
 package urlshortener.team.repository;
 
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
+import urlshortener.team.domain.ApiResponse;
 import urlshortener.team.domain.CsvFormat;
 import urlshortener.team.domain.Job;
 import urlshortener.team.domain.ShortURL;
@@ -15,6 +19,7 @@ import java.net.URI;
 import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Repository
@@ -118,7 +123,17 @@ public class JobRepositoryImpl implements JobRepository{
         List<String> urisShorted = new ArrayList<>();
         for(String uri : urisToShort){
             // Shortening uri
-            // ...
+            /*
+            ShortURL su = createAndSaveIfValid(uri, sponsor, UUID
+                    .randomUUID().toString(), extractIP(request), periodicity, qr);
+            if (su != null) {
+                return new ResponseEntity<>(su, h, HttpStatus.CREATED);
+            } else {
+                ApiResponse a = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "INV",uri + " is not a valid url");
+                return new ResponseEntity<>(a, HttpStatus.BAD_REQUEST);
+            }
+            */
+
             urisShorted.add("http://localhostMock:8080/123");
             System.out.println("Llevo: "+job.getConverted());
             job.setConverted(job.getConverted()+1);

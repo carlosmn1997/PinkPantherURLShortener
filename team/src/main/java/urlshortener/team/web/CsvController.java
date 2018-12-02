@@ -52,8 +52,7 @@ public class CsvController {
 
 
     @RequestMapping(value = "/uploadCSV", method = RequestMethod.POST)
-    public ResponseEntity<String> downloadCSV(HttpServletResponse response, @RequestParam("file") MultipartFile file,
-                            HttpServletRequest request) throws IOException {
+    public ResponseEntity<String> downloadCSV(@RequestParam("file") MultipartFile file) throws IOException {
 
         List<String> uris = csvRepository.parserCsv(file);
         if(uris == null){

@@ -4,10 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.ShortURLRepository;
+import urlshortener.team.stompMessages.ReadyMessage;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
@@ -48,7 +53,7 @@ public class SponsorController {
         ShortURL shorted = shortURLRepository.findByKey(id);
         if (shorted != null) {
             String sponsor = shorted.getSponsor();
-            if (shorted != null) {
+            if (sponsor != null) {
                 HttpHeaders h = new HttpHeaders();
                 return new ResponseEntity<>(shorted.getSponsor(), HttpStatus.OK);
             } else {
@@ -61,6 +66,33 @@ public class SponsorController {
                     .body("URI acortada no existe");
         }
 	}
+
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
+
+	private static int id = 0;
+
+
+	// The client is ready to wait
+    @MessageMapping("/waitingSponsor")
+    public void setTimer (@Payload ReadyMessage message) {
+        ShortURL shorted = shortURLRepository.findByKey(message.getContent());
+        if (shorted != null) {
+            timer(id++, shorted.getTarget());
+        }
+    }
+
+    @Async
+    public void timer(int idTimer, String originalUri){
+        try{
+            Thread.sleep(5000); // Wait for 5 secs
+
+            // Notify with the sponsor to the client
+            messagingTemplate.convertAndSend("/queue/reply-" + idTimer, originalUri);
+        } catch (InterruptedException e){
+            e.printStackTrace();
+        }
+    }
 
 	private static String responseToString(HttpURLConnection con) throws IOException{
         BufferedReader bfr = new BufferedReader(
