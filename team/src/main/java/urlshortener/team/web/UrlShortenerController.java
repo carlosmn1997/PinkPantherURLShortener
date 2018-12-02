@@ -42,6 +42,7 @@ public class UrlShortenerController {
 				createAndSaveClick(id, extractIP(request));
 				return createSuccessfulRedirectToResponse(l);
 			}else{
+
 				return ResponseEntity.ok(SponsorController.generateHtml(l));
 			}
 		} else {
