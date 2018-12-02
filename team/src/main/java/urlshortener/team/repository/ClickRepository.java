@@ -21,4 +21,6 @@ public interface ClickRepository {
 	Long count();
 
 	List<Click> list(Long limit, Long offset);
+
+	void createAndSaveClick(String hash, String ip);
 }

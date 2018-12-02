@@ -10,10 +10,10 @@ import org.mockito.stubbing.Answer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import urlshortener.team.domain.ShortURL;
+import urlshortener.team.domain.ValidUrl;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.ShortURLRepository;
 import urlshortener.team.web.fixture.ShortURLFixture;
-
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,6 +32,9 @@ public class UrlShortenerTests {
 
     @Mock
     private ShortURLRepository shortURLRepository;
+
+    @Mock
+    private ValidUrl validUrl;
 
     @InjectMocks
     private UrlShortenerController urlShortener;
@@ -65,6 +68,7 @@ public class UrlShortenerTests {
     @Test
     public void thatShortenerCreatesARedirectIfTheURLisOK() throws Exception {
         configureTransparentSave();
+        when(validUrl.check()).thenReturn(true);
 
         mockMvc.perform(post("/short").param("uri", "http://example.com/")
                 .param("periodicity", "true")
@@ -81,6 +85,7 @@ public class UrlShortenerTests {
     @Test
     public void thatShortenerCreatesARedirectWithSponsor() throws Exception {
         configureTransparentSave();
+        when(validUrl.check()).thenReturn(true);
 
         mockMvc.perform(
                 post("/short").param("uri", "http://example.com/").param(
@@ -98,6 +103,7 @@ public class UrlShortenerTests {
     @Test
     public void thatShortenerFailsIfTheURLisWrong() throws Exception {
         configureTransparentSave();
+        when(validUrl.check()).thenReturn(false);
 
         mockMvc.perform(post("/short").param("uri", "someKey")
                 .param("periodicity", "true")

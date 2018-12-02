@@ -1,7 +1,15 @@
 package urlshortener.team.domain;
 
+import com.google.common.hash.Hashing;
+import org.springframework.http.HttpStatus;
+import urlshortener.team.web.UrlShortenerController;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
+import java.util.UUID;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 public class ShortURL {
 
@@ -19,6 +27,26 @@ public class ShortURL {
 	private Boolean aliveOnLastCheck;
 	private Boolean qr;
 	private byte[] qrImage;
+
+	/*
+	 * ShortURL's constructor
+	 */
+	public ShortURL(String target, String sponsor, String ip, boolean checkStatus, boolean qr) {
+		this.hash = Hashing.murmur3_32().hashString(target, StandardCharsets.UTF_8).toString();
+		this.target = target;
+		this.uri = linkTo(methodOn(UrlShortenerController.class)
+				.redirectTo(hash, null)).toUri();
+		this.sponsor = sponsor;
+		this.created = new Date(System.currentTimeMillis());
+		this.owner = UUID.randomUUID().toString();
+		this.mode = HttpStatus.TEMPORARY_REDIRECT.value();
+		this.safe = true;
+		this.ip = ip;
+		this.country = null;
+		this.checkStatus = checkStatus;
+		this.aliveOnLastCheck = false;
+		this.qr = qr;
+	}
 
 	public ShortURL(String hash, String target, URI uri, String sponsor,
 					Date created, String owner, Integer mode, Boolean safe,
@@ -163,7 +191,7 @@ public class ShortURL {
 		this.qrImage = qrImage;
 	}
 
-	public boolean isAliveOnLastCheck(){ return this.aliveOnLastCheck;}
+	public Boolean isAliveOnLastCheck(){ return this.aliveOnLastCheck;}
 
 	public void setAliveOnLastCheck(boolean b){ this.aliveOnLastCheck = b; }
 }
