@@ -28,12 +28,14 @@ public class SponsorController {
             "<head>\n" +
             "    <meta charset=\"UTF-8\">\n" +
             "    <title>Redirecting...</title>\n" +
-            "    <!-- <script src=\"js/sponsor.js\"></script> -->\n" +
+            "    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" type=\"text/javascript\"></script>\n" +
+            "    <script src=\"js/sponsor.js\" type=\"text/javascript\"></script>\n" +
             "</head>\n" +
             "<body>\n" +
             "    <div style=\"width:100%;height:50px;position:fixed;top:0px;\n" +
             "        background-color:#ff3399;z-index:99999;\">\n" +
-            "        <span id=\"skip\">Saltar</span>\n" +
+            "        <span id=\"sponsor-skip-button\">Skip</span>\n" +
+            "        <span id=\"sponsor-countdown\" style=\"display:none;\">Wait 5 seconds...</span>\n" +
             "    </div>\n" +
             "    <div id=\"sponsor-body\" style=\"position:absolute;top:50px;\">${sponsorhtml}</div>\n" +
             "</body>\n" +
