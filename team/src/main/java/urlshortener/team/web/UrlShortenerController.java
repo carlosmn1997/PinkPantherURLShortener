@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +23,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import urlshortener.team.domain.ApiResponse;
 
-@RestController
+@Controller
 public class UrlShortenerController {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(UrlShortenerController.class);
@@ -37,8 +38,12 @@ public class UrlShortenerController {
 			HttpServletRequest request) {
 		ShortURL l = shortURLRepository.findByKey(id);
 		if (l != null) {
-			createAndSaveClick(id, extractIP(request));
-			return createSuccessfulRedirectToResponse(l);
+			if(l.getSponsor()==null) {
+				createAndSaveClick(id, extractIP(request));
+				return createSuccessfulRedirectToResponse(l);
+			}else{
+				return ResponseEntity.ok(SponsorController.generateHtml(l));
+			}
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
