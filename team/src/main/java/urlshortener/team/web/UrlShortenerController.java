@@ -52,7 +52,7 @@ public class UrlShortenerController {
                                        @RequestParam(value = "sponsor", required = false) String sponsor,
                                        HttpServletRequest request) {
 		ValidUrl url = new ValidUrl(uri);
-		if(url.check()) {
+		if(url.checkSyntax()) {
 			ShortURL su = new ShortURL(uri, sponsor, extractIP(request), periodicity, qr);
 			su = shortURLRepository.save(su);
 			if(su != null) {
