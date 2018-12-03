@@ -31,8 +31,9 @@ public class ShortURL {
 	/*
 	 * ShortURL's constructor
 	 */
-	public ShortURL(String target, String sponsor, String ip, boolean checkStatus, boolean qr) {
-		this.hash = Hashing.murmur3_32().hashString(target, StandardCharsets.UTF_8).toString();
+	public ShortURL(String target, String sponsor, String ip, Boolean checkStatus, Boolean qr) {
+		this.hash = Hashing.murmur3_32().hashString(target + sponsor + ip
+				+ checkStatus.toString() + qr.toString(), StandardCharsets.UTF_8).toString();
 		this.target = target;
 		this.uri = linkTo(methodOn(UrlShortenerController.class)
 				.redirectTo(hash, null)).toUri();

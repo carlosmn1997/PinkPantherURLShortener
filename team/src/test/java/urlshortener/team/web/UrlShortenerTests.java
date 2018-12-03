@@ -68,16 +68,13 @@ public class UrlShortenerTests {
     @Test
     public void thatShortenerCreatesARedirectIfTheURLisOK() throws Exception {
         configureTransparentSave();
-        when(validUrl.check()).thenReturn(true);
+        when(validUrl.checkSyntax()).thenReturn(true);
 
         mockMvc.perform(post("/short").param("uri", "http://example.com/")
                 .param("periodicity", "true")
                 .param("qr", "false"))
                 .andDo(print())
-                .andExpect(redirectedUrl("http://localhost/f684a3c4"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.hash", is("f684a3c4")))
-                .andExpect(jsonPath("$.uri", is("http://localhost/f684a3c4")))
                 .andExpect(jsonPath("$.target", is("http://example.com/")))
                 .andExpect(jsonPath("$.sponsor", is(nullValue())));
     }
@@ -85,17 +82,14 @@ public class UrlShortenerTests {
     @Test
     public void thatShortenerCreatesARedirectWithSponsor() throws Exception {
         configureTransparentSave();
-        when(validUrl.check()).thenReturn(true);
+        when(validUrl.checkSyntax()).thenReturn(true);
 
         mockMvc.perform(
                 post("/short").param("uri", "http://example.com/").param(
                         "sponsor", "http://sponsor.com/")
                         .param("periodicity", "true")
                         .param("qr", "false")).andDo(print())
-                .andExpect(redirectedUrl("http://localhost/f684a3c4"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.hash", is("f684a3c4")))
-                .andExpect(jsonPath("$.uri", is("http://localhost/f684a3c4")))
                 .andExpect(jsonPath("$.target", is("http://example.com/")))
                 .andExpect(jsonPath("$.sponsor", is("http://sponsor.com/")));
     }
@@ -103,7 +97,7 @@ public class UrlShortenerTests {
     @Test
     public void thatShortenerFailsIfTheURLisWrong() throws Exception {
         configureTransparentSave();
-        when(validUrl.check()).thenReturn(false);
+        when(validUrl.checkSyntax()).thenReturn(false);
 
         mockMvc.perform(post("/short").param("uri", "someKey")
                 .param("periodicity", "true")
@@ -113,8 +107,9 @@ public class UrlShortenerTests {
 
     @Test
     public void thatShortenerFailsIfTheRepositoryReturnsNull() throws Exception {
-        when(shortURLRepository.save(any(ShortURL.class)))
-                .thenReturn(null);
+        when(validUrl.checkSyntax()).thenReturn(true);
+        when(shortURLRepository.save(any(ShortURL.class))).thenReturn(null);
+
         mockMvc.perform(post("/short").param("uri", "someKey")
                 .param("periodicity", "true")
                 .param("qr", "false")).andDo(print())
@@ -124,6 +119,7 @@ public class UrlShortenerTests {
     @Test
     public void thatCheckStatusIsTrueIfPeriodicityIsTrue() throws Exception {
         configureTransparentSave();
+        when(validUrl.checkSyntax()).thenReturn(true);
 
         mockMvc.perform(post("/short").param("uri", "http://example.com/")
                 .param("periodicity", "true")
@@ -135,6 +131,7 @@ public class UrlShortenerTests {
     @Test
     public void thatCheckStatusIsFalseIfPeriodicityIsFalse() throws Exception {
         configureTransparentSave();
+        when(validUrl.checkSyntax()).thenReturn(true);
 
         mockMvc.perform(post("/short").param("uri", "http://example.com/")
                 .param("periodicity", "false")
