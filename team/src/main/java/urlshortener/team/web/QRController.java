@@ -51,7 +51,9 @@ public class QRController {
                     h.set(HttpHeaders.RETRY_AFTER,"5");
                     return new ResponseEntity<>(h,HttpStatus.NOT_FOUND);
                 } else {
-                    return new ResponseEntity<>(s, HttpStatus.OK);
+                    HttpHeaders h = new HttpHeaders();
+                    h.setContentType(MediaType.IMAGE_PNG);
+                    return new ResponseEntity<>(s.getQRimage(), h,HttpStatus.OK);
                 }
             }
             else{

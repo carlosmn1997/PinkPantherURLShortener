@@ -16,8 +16,8 @@ CREATE TABLE SHORTURL(
 	SAFE		BOOLEAN,						-- Safe target
 	IP			VARCHAR(20),				-- IP
 	COUNTRY		VARCHAR(50),					-- Country
-	QR        BOOLEAN,
-	QRImage   BLOB,
+	qr        BOOLEAN,
+	qrImage   BLOB,
 	CHECKSTATUS BOOLEAN,
 	ALIVEONLASTCHECK BOOLEAN
 );

@@ -23,7 +23,7 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
             rs.getString("owner"), rs.getInt("mode"),
             rs.getBoolean("safe"), rs.getString("ip"),
             rs.getString("country"), rs.getBoolean("checkStatus"),
-			rs.getBoolean("aliveOnLastCheck"));
+			rs.getBoolean("aliveOnLastCheck"),rs.getBoolean("qr"),rs.getBytes("qrImage"));
 
 	private JdbcTemplate jdbc;
 
@@ -45,7 +45,8 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
 	@Override
 	public ShortURL save(ShortURL su) {
 		try {
-			jdbc.update("INSERT INTO shorturl VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+			jdbc.update("INSERT INTO shorturl (HASH,TARGET,SPONSOR,CREATED,OWNER,MODE,SAFE,IP,COUNTRY,CHECKSTATUS" +
+							",ALIVEONLASTCHECK) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
 					su.getHash(), su.getTarget(), su.getSponsor(),
 					su.getCreated(), su.getOwner(), su.getMode(), su.getSafe(),
 					su.getIP(), su.getCountry(), su.isCheckStatus(), su.isAliveOnLastCheck());
