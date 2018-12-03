@@ -41,11 +41,22 @@ $(function(){
             processData: false
         })
             .done(function(res){
-                $("#mensaje").html("Respuesta: " + res);
+                //$("#mensaje").html("Respuesta: " + res);
                 console.log(res);
+                getCsvStatus(res);
             });
     });
 });
+
+function getCsvStatus(url){
+    $.ajax({
+        url: url
+    })
+        .done(function(res){
+            console.log(res);
+            setTimeout(getCsvStatus(url), 50000);
+        });
+}
 
 /*
 (function getCsvStatus(id) {
@@ -60,4 +71,5 @@ $(function(){
         }
     });
 })();
+
 */

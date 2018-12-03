@@ -24,7 +24,7 @@ public class CsvRepositoryImpl implements CsvRepository {
             br = new BufferedReader(new InputStreamReader(is));
             while ((line = br.readLine()) != null) {
                 ValidUrl url = new ValidUrl(line);
-                boolean ok = url.check();
+                boolean ok = url.checkSyntax();
                 if(ok){
                     result.add(line);
                 }
