@@ -22,3 +22,42 @@ $(document).ready(
                 });
             });
     });
+
+
+$(function(){
+    $("#uploadCsv").on("submit", function(e){
+        e.preventDefault();
+        var f = $(this);
+        var formData = new FormData(document.getElementById("uploadCsv"));
+        //formData.append("dato", "valor"); Si queremos añadir mas cosas
+        //formData.append(f.attr("name"), $(this)[0].files[0]);
+        $.ajax({
+            url: "/uploadCSV",
+            type: "post",
+            dataType: "html",
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false
+        })
+            .done(function(res){
+                $("#mensaje").html("Respuesta: " + res);
+                console.log(res);
+            });
+    });
+});
+
+/*
+(function getCsvStatus(id) {
+    $.ajax({
+        url: '/job/'+id,
+        success: function(data) {
+            $('.result').html(data);
+        },
+        complete: function() {
+            // Schedule the next request when the current one's complete
+            setTimeout(getCsvStatus(id), 5000);
+        }
+    });
+})();
+*/
