@@ -2,6 +2,7 @@ package urlshortener.team;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +45,31 @@ public class CsvIntegrationTests {
 
 
 	@Test
+    @Ignore
 	public void testCsvCorrect() throws Exception {
 	    Resource testFile = getTestFile();
 		ResponseEntity<String> entity = uploadCsv(testFile);
 
-		assertThat(entity.getStatusCode(), is(HttpStatus.OK));
-		assertThat(entity.getBody(), is("http://localhost:"+this.port+"/0"));
-	}
+		assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
+		assertThat(entity.getBody(), is("http://localhost:8080/job/0"));
+
+		// Get the job
+        entity = restTemplate.getForEntity( entity.getBody(), String.class);
+        assertThat(entity.getStatusCode(), is(HttpStatus.OK));
+        ReadContext rc = JsonPath.parse(entity.getBody());
+
+        // TODO hacer un bucle y retry after
+        assertThat(rc.read("$.hash"), is("0"));
+        assertThat(rc.read("$.converted"), is(0));
+        assertThat(rc.read("$.total"), is(3));
+
+        Thread.sleep(30000);
+
+        // Get the result
+        entity = restTemplate.getForEntity("http://localhost:8080/result/0", String.class);
+        assertThat(entity.getStatusCode(), is(HttpStatus.OK));
+        assertThat(entity.getHeaders().getContentType(), is(new MediaType("text", "csv", Charset.forName("UTF-8"))));
+    }
 
     @Test
     public void testCsvIncorrect() throws Exception {
