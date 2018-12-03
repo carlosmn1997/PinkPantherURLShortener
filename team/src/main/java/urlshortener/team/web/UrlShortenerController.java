@@ -54,6 +54,7 @@ public class UrlShortenerController {
 		ValidUrl url = new ValidUrl(uri);
 		if(url.check()) {
 			ShortURL su = new ShortURL(uri, sponsor, extractIP(request), periodicity, qr);
+			su = shortURLRepository.save(su);
 			if(su != null) {
 				if(qr) {
 					// LLAMAR AQUÍ A MÉTODO DE CREAR QR
