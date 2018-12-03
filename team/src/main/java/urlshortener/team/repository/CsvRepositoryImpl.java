@@ -6,6 +6,7 @@ import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
 import urlshortener.team.domain.CsvFormat;
+import urlshortener.team.domain.ValidUrl;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -18,13 +19,18 @@ public class CsvRepositoryImpl implements CsvRepository {
         BufferedReader br;
         List<String> result = new ArrayList<>();
         try {
-
             String line;
             InputStream is = multipart.getInputStream();
             br = new BufferedReader(new InputStreamReader(is));
             while ((line = br.readLine()) != null) {
-                // TODO asegurarse de que es una URI...
-                result.add(line);
+                ValidUrl url = new ValidUrl(line);
+                boolean ok = url.checkSyntax();
+                if(ok){
+                    result.add(line);
+                }
+                else{
+                    return null;
+                }
             }
 
         } catch (IOException e) {

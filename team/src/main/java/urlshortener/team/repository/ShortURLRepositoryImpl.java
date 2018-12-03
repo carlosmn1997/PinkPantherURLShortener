@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import java.util.Collections;
 import java.util.List;
-
 import urlshortener.team.domain.ShortURL;
 
 @Repository
@@ -24,7 +23,7 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
             rs.getString("owner"), rs.getInt("mode"),
             rs.getBoolean("safe"), rs.getString("ip"),
             rs.getString("country"), rs.getBoolean("checkStatus"),
-			rs.getBoolean("aliveOnLastCheck"));
+			rs.getBoolean("aliveOnLastCheck"),rs.getBoolean("qr"),rs.getBytes("qrImage"));
 
 	private JdbcTemplate jdbc;
 
@@ -46,7 +45,8 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
 	@Override
 	public ShortURL save(ShortURL su) {
 		try {
-			jdbc.update("INSERT INTO shorturl VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+			jdbc.update("INSERT INTO shorturl (HASH,TARGET,SPONSOR,CREATED,OWNER,MODE,SAFE,IP,COUNTRY,CHECKSTATUS" +
+							",ALIVEONLASTCHECK) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
 					su.getHash(), su.getTarget(), su.getSponsor(),
 					su.getCreated(), su.getOwner(), su.getMode(), su.getSafe(),
 					su.getIP(), su.getCountry(), su.isCheckStatus(), su.isAliveOnLastCheck());
@@ -78,13 +78,11 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
 	@Override
 	public void update(ShortURL su) {
 		try {
-		    String check = (su.isCheckStatus()) ? "TRUE" : "FALSE";
-            String alive = (su.isAliveOnLastCheck()) ? "TRUE" : "FALSE";
 			jdbc.update(
-					"update shorturl set target=?, sponsor=?, created=?, owner=?, mode=?, safe=?, ip=?, country=?, CHECKSTATUS="+ check +", ALIVEONLASTCHECK="+ alive +" where hash=?",
+					"update shorturl set target=?, sponsor=?, created=?, owner=?, mode=?, safe=?, ip=?, country=?, checkStatus=?, aliveOnLastCheck=? where hash=?",
 					su.getTarget(), su.getSponsor(), su.getCreated(),
 					su.getOwner(), su.getMode(), su.getSafe(), su.getIP(),
-					su.getCountry(), su.getHash());
+					su.getCountry(), su.isCheckStatus(), su.isAliveOnLastCheck(), su.getHash());
 		} catch (Exception e) {
 			log.debug("When update for hash {}",  su.getHash(), e);
 		}

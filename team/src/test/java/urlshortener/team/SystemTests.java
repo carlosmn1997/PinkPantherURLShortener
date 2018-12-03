@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import javax.xml.ws.Response;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -32,10 +32,7 @@ public class SystemTests {
 	@Autowired
 	private TestRestTemplate restTemplate;
 
-	@LocalServerPort
-	private int port;
 
-	/*
 	@Test
 	public void testHome() {
 		ResponseEntity<String> entity = restTemplate.getForEntity("/", String.class);
@@ -43,7 +40,6 @@ public class SystemTests {
 		assertTrue(entity.getHeaders().getContentType().isCompatibleWith(new MediaType("text", "html")));
 		assertThat(entity.getBody(), containsString("<title>URL"));
 	}
-	*/
 
 	@Test
 	public void testCss() {
@@ -54,31 +50,121 @@ public class SystemTests {
 	}
 
 	@Test
-	public void testCreateLink() throws Exception {
-		ResponseEntity<String> entity = postLink("http://example.com/");
+	public void testCreateLinkFailsIfNoPeriodicity() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", null, true, null);
+		assertThat(entity.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+	}
 
+	@Test
+	public void testCreateLinkFailsIfNoQr() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", true, null, null);
+		assertThat(entity.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+	}
+
+	@Test
+	public void testCreateLinkWithTruePeriodicity() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", true, false, null);
 		assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
-		assertThat(entity.getHeaders().getLocation(), is(new URI("http://localhost:"+ this.port+"/f684a3c4")));
 		assertThat(entity.getHeaders().getContentType(), is(new MediaType("application", "json", Charset.forName("UTF-8"))));
 		ReadContext rc = JsonPath.parse(entity.getBody());
-		assertThat(rc.read("$.hash"), is("f684a3c4"));
-		assertThat(rc.read("$.uri"), is("http://localhost:"+ this.port+"/f684a3c4"));
-		assertThat(rc.read("$.target"), is("http://example.com/"));
+		assertThat(rc.read("$.checkStatus"), is(true));
+	}
+
+	@Test
+	public void testCreateLinkRWithFalsePeriodicity() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", false, false, null);
+		assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
+		assertThat(entity.getHeaders().getContentType(), is(new MediaType("application", "json", Charset.forName("UTF-8"))));
+		ReadContext rc = JsonPath.parse(entity.getBody());
+		assertThat(rc.read("$.checkStatus"), is(false));
+	}
+
+	@Test
+	public void testCreateLinkWithTrueQr() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", true, true, null);
+		assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
+		assertThat(entity.getHeaders().getContentType(), is(new MediaType("application", "json", Charset.forName("UTF-8"))));
+		ReadContext rc = JsonPath.parse(entity.getBody());
+		assertThat(rc.read("$.qr"), is(true));
+	}
+
+	@Test
+	public void testCreateLinkWithFalseQr() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", true, false, null);
+		assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
+		assertThat(entity.getHeaders().getContentType(), is(new MediaType("application", "json", Charset.forName("UTF-8"))));
+		ReadContext rc = JsonPath.parse(entity.getBody());
+		assertThat(rc.read("$.qr"), is(false));
+	}
+
+	@Test
+	public void testCreateLinkWithoutSponsor() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", false, false, null);
+
+		assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
+		assertThat(entity.getHeaders().getContentType(), is(new MediaType("application", "json", Charset.forName("UTF-8"))));
+		ReadContext rc = JsonPath.parse(entity.getBody());
 		assertThat(rc.read("$.sponsor"), is(nullValue()));
 	}
 
 	@Test
-	public void testRedirection() throws Exception {
-		postLink("http://example.com/");
+	public void testCreateLinkWithSponsor() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", false, false, "www.misponsor.com");
 
-		ResponseEntity<String> entity = restTemplate.getForEntity( "/f684a3c4", String.class);
+		assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
+		assertThat(entity.getHeaders().getContentType(), is(new MediaType("application", "json", Charset.forName("UTF-8"))));
+		ReadContext rc = JsonPath.parse(entity.getBody());
+		assertThat(rc.read("$.sponsor"), is("www.misponsor.com"));
+	}
+
+	@Test
+	public void testRedirection() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", true, true, null);
+
+		ReadContext rc = JsonPath.parse(entity.getBody());
+		entity = restTemplate.getForEntity( "/" + rc.read("$.hash"), String.class);
 		assertThat(entity.getStatusCode(), is(HttpStatus.TEMPORARY_REDIRECT));
 		assertThat(entity.getHeaders().getLocation(), is(new URI("http://example.com/")));
 	}
 
-	private ResponseEntity<String> postLink(String url) {
+	@Test
+	public void testBadRedirection() throws Exception {
+		ResponseEntity<String> entity = restTemplate.getForEntity( "/someKey", String.class);
+
+	}
+
+	@Test
+	public void testAliveWhenPeriodicityIsFalse() throws Exception {
+		ResponseEntity<String> entity = postLink("http://marca.com/", false, true, null);
+
+		ReadContext rc = JsonPath.parse(entity.getBody());
+		entity = restTemplate.getForEntity( "/" + rc.read("$.hash") + "/alive", String.class);
+		assertThat(entity.getStatusCode(), is(HttpStatus.NOT_FOUND));
+	}
+
+	@Test
+	public void testAliveWhenPeriodicityIsTrue() throws Exception {
+		ResponseEntity<String> entity = postLink("http://example.com/", true, true, null);
+
+		ReadContext rc = JsonPath.parse(entity.getBody());
+		entity = restTemplate.getForEntity( "/" + rc.read("$.hash") + "/alive", String.class);
+		assertThat(entity.getStatusCode(), is(HttpStatus.OK));
+		assertThat(rc.read("$.checkStatus"), is(true));
+		assertThat(rc.read("$.aliveOnLastCheck"), anyOf(is(true), is(false)));
+	}
+
+	@Test
+	public void testAliveWhenKeyDoesNotExist() throws Exception {
+		ResponseEntity<String> entity = restTemplate.getForEntity( "/someKey/alive", String.class);
+		assertThat(entity.getStatusCode(), is(HttpStatus.NOT_FOUND));
+	}
+
+	private ResponseEntity<String> postLink(String url, Boolean periodicity, Boolean qr, String sponsor) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("uri", url);
+		if(periodicity != null) { parts.add("periodicity", periodicity); }
+		if(qr != null) { parts.add("qr", qr); }
+		if(sponsor != null) { parts.add("sponsor", sponsor); }
 		return restTemplate.postForEntity("/short", parts, String.class);
 	}
 

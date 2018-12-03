@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Types;
@@ -149,4 +150,11 @@ public class ClickRepositoryImpl implements ClickRepository {
 		return -1L;
 	}
 
+	@Override
+	public void createAndSaveClick(String hash, String ip) {
+		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
+				null, null, null, ip, null);
+		cl=this.save(cl);
+		log.info(cl!=null?"["+hash+"] saved with id ["+cl.getId()+"]":"["+hash+"] was not saved");
+	}
 }

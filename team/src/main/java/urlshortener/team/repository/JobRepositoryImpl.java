@@ -1,5 +1,6 @@
 package urlshortener.team.repository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -8,10 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
-import urlshortener.team.domain.ApiResponse;
-import urlshortener.team.domain.CsvFormat;
-import urlshortener.team.domain.Job;
-import urlshortener.team.domain.ShortURL;
+import urlshortener.team.domain.*;
 
 import javax.sql.rowset.serial.SerialBlob;
 import java.io.*;
@@ -46,6 +44,9 @@ public class JobRepositoryImpl implements JobRepository{
     public JobRepositoryImpl(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
+
+    @Autowired
+    protected ShortURLRepository shortURLRepository;
 
     @Override
     public Job findByKey(String id){
@@ -122,19 +123,16 @@ public class JobRepositoryImpl implements JobRepository{
     public List<String> shortUris(List<String> urisToShort, Job job){
         List<String> urisShorted = new ArrayList<>();
         for(String uri : urisToShort){
-            // Shortening uri
-            /*
-            ShortURL su = createAndSaveIfValid(uri, sponsor, UUID
-                    .randomUUID().toString(), extractIP(request), periodicity, qr);
-            if (su != null) {
-                return new ResponseEntity<>(su, h, HttpStatus.CREATED);
-            } else {
-                ApiResponse a = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "INV",uri + " is not a valid url");
-                return new ResponseEntity<>(a, HttpStatus.BAD_REQUEST);
-            }
-            */
-
-            urisShorted.add("http://localhostMock:8080/123");
+            // Save URI
+                ShortURL su = new ShortURL(uri, null, null, false, false);
+                su = shortURLRepository.save(su);
+                if(su != null) {
+                    urisShorted.add(su.getUri().toString());
+                }
+                else{
+                    urisShorted.add("No alcanzable");
+                }
+            //urisShorted.add("http://localhostMock:8080/123");
             System.out.println("Llevo: "+job.getConverted());
             job.setConverted(job.getConverted()+1);
             update(job);

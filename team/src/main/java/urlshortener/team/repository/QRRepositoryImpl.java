@@ -53,17 +53,17 @@ public class QRRepositoryImpl implements QRRepository {
     };
 
     @Override
-    public boolean createQR(String uri) {
+    public boolean createQR(String hash, String uri) {
 
         try {
-            jdbc.update("UPDATE SHORTURL SET qr = TRUE");
+            jdbc.update("UPDATE SHORTURL SET qr = TRUE WHERE HASH = ?",hash);
 
             RestTemplate restTemplate = new RestTemplate();
             byte[] pngData = restTemplate.getForObject(
                     "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+uri, byte[].class);
             Blob b = new javax.sql.rowset.serial.SerialBlob(pngData);
 
-            jdbc.update("UPDATE SHORTURL SET qrImage = ?",b);
+            jdbc.update("UPDATE SHORTURL SET qrImage = ? WHERE HASH = ?",b,hash);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

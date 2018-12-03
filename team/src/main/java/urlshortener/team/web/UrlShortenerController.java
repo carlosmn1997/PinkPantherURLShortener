@@ -1,7 +1,5 @@
 package urlshortener.team.web;
 
-import com.google.common.hash.Hashing;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,16 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.sql.Date;
-import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import urlshortener.team.domain.ShortURL;
+import urlshortener.team.domain.ValidUrl;
 import urlshortener.team.repository.ClickRepository;
+import urlshortener.team.repository.QRRepository;
 import urlshortener.team.repository.ShortURLRepository;
 import urlshortener.team.domain.Click;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import urlshortener.team.domain.ApiResponse;
 
 @Controller
@@ -32,6 +28,9 @@ public class UrlShortenerController {
 
 	@Autowired
 	protected ClickRepository clickRepository;
+
+	@Autowired
+	protected QRRepository qrRepository;
 
 	@RequestMapping(value = "/{id:(?!link|index).*}", method = RequestMethod.GET)
 	public ResponseEntity<?> redirectTo(@PathVariable String id,
@@ -50,63 +49,28 @@ public class UrlShortenerController {
 		}
 	}
 
-	private void createAndSaveClick(String hash, String ip) {
-		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
-				null, null, null, ip, null);
-		cl=clickRepository.save(cl);
-		LOG.info(cl!=null?"["+hash+"] saved with id ["+cl.getId()+"]":"["+hash+"] was not saved");
-	}
-
-	private String extractIP(HttpServletRequest request) {
-		return request.getRemoteAddr();
-	}
-
-	private ResponseEntity<?> createSuccessfulRedirectToResponse(ShortURL l) {
-		HttpHeaders h = new HttpHeaders();
-		h.setLocation(URI.create(l.getTarget()));
-		return new ResponseEntity<>(h, HttpStatus.valueOf(l.getMode()));
-	}
-
 	@RequestMapping(value = "/short", method = RequestMethod.POST)
 	public ResponseEntity<?> shortener(@RequestParam("uri") String uri,
                                        @RequestParam(value = "periodicity") boolean periodicity,
                                        @RequestParam(value = "qr") boolean qr,
                                        @RequestParam(value = "sponsor", required = false) String sponsor,
                                        HttpServletRequest request) {
-		ShortURL su = createAndSaveIfValid(uri, sponsor, UUID
-				.randomUUID().toString(), extractIP(request), periodicity, qr);
-		if (su != null) {
-		    if(qr) {
-                // LLAMAR AQUÍ A MÉTODO DE CREAR QR
-            }
-			HttpHeaders h = new HttpHeaders();
-			h.setLocation(su.getUri());
-			return new ResponseEntity<>(su, h, HttpStatus.CREATED);
-		} else {
-			ApiResponse a = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "INV",uri + " is not a valid url");
-			return new ResponseEntity<>(a, HttpStatus.BAD_REQUEST);
+		ValidUrl url = new ValidUrl(uri);
+		if(url.checkSyntax()) {
+			ShortURL su = new ShortURL(uri, sponsor, extractIP(request), periodicity, qr);
+			su = shortURLRepository.save(su);
+			if(su != null) {
+				if(qr) {
+					qrRepository.createQR(su.getHash(),su.getUri().toString());
+				}
+				HttpHeaders h = new HttpHeaders();
+				h.setLocation(su.getUri());
+				return new ResponseEntity<>(su, h, HttpStatus.CREATED);
+			}
 		}
-	}
-
-	private ShortURL createAndSaveIfValid(String url, String sponsor,
-										  String owner, String ip,
-										  boolean periodicity, boolean qr) {
-		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
-				"https" });
-		if (urlValidator.isValid(url)) {
-			String id = Hashing.murmur3_32()
-					.hashString(url, StandardCharsets.UTF_8).toString();
-			ShortURL su = new ShortURL(id, url,
-					linkTo(
-							methodOn(UrlShortenerController.class).redirectTo(
-									id, null)).toUri(), sponsor, new Date(
-					System.currentTimeMillis()), owner,
-					HttpStatus.TEMPORARY_REDIRECT.value(), true, ip, null,
-					periodicity, false);
-			return shortURLRepository.save(su);
-		} else {
-			return null;
-		}
+		// BAD REQUEST
+		ApiResponse a = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "INV","Bad request");
+		return new ResponseEntity<>(a, HttpStatus.BAD_REQUEST);
 	}
 
 	@RequestMapping(value = "/{id}/alive", method = RequestMethod.GET)
@@ -126,4 +90,24 @@ public class UrlShortenerController {
             return new ResponseEntity<>(a, HttpStatus.NOT_FOUND);
         }
     }
+
+    /*
+     * PRIVATE METHODS
+     */
+	private void createAndSaveClick(String hash, String ip) {
+		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
+				null, null, null, ip, null);
+		cl=clickRepository.save(cl);
+		LOG.info(cl!=null?"["+hash+"] saved with id ["+cl.getId()+"]":"["+hash+"] was not saved");
+	}
+
+	private String extractIP(HttpServletRequest request) {
+		return request.getRemoteAddr();
+	}
+
+	private ResponseEntity<?> createSuccessfulRedirectToResponse(ShortURL l) {
+		HttpHeaders h = new HttpHeaders();
+		h.setLocation(URI.create(l.getTarget()));
+		return new ResponseEntity<>(h, HttpStatus.valueOf(l.getMode()));
+	}
 }
