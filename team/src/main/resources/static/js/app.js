@@ -5,8 +5,8 @@ $(document).ready(
                 event.preventDefault();
                 $.ajax({
                     type : "POST",
-                    url : "/link",
-                    data : $(this).serialize(),
+                    url : "/short",
+                    data : $("#shortener").serialize({ checkboxesAsBools: true }),
                     success : function(msg) {
                         $("#result").html(
                             "<div class='alert alert-success lead'><a target='_blank' href='"
@@ -17,7 +17,7 @@ $(document).ready(
                     },
                     error : function() {
                         $("#result").html(
-                                "<div class='alert alert-danger lead'>ERROR</div>");
+                            "<div class='alert alert-danger lead'>ERROR</div>");
                     }
                 });
             });
@@ -56,6 +56,54 @@ function getCsvStatus(url){
             console.log(res);
             setTimeout(getCsvStatus(url), 50000);
         });
+}
+
+// For serialazing checkboxes
+(function ($) {
+
+    $.fn.serialize = function (options) {
+        return $.param(this.serializeArray(options));
+    };
+
+    $.fn.serializeArray = function (options) {
+        var o = $.extend({
+            checkboxesAsBools: false
+        }, options || {});
+
+        var rselectTextarea = /select|textarea/i;
+        var rinput = /text|hidden|password|search/i;
+
+        return this.map(function () {
+            return this.elements ? $.makeArray(this.elements) : this;
+        })
+            .filter(function () {
+                return this.name && !this.disabled &&
+                    (this.checked
+                        || (o.checkboxesAsBools && this.type === 'checkbox')
+                        || rselectTextarea.test(this.nodeName)
+                        || rinput.test(this.type));
+            })
+            .map(function (i, elem) {
+                var val = $(this).val();
+                return val == null ?
+                    null :
+                    $.isArray(val) ?
+                        $.map(val, function (val, i) {
+                            return { name: elem.name, value: val };
+                        }) :
+                        {
+                            name: elem.name,
+                            value: (o.checkboxesAsBools && this.type === 'checkbox') ? //moar ternaries!
+                                (this.checked ? 'true' : 'false') :
+                                val
+                        };
+            }).get();
+    };
+
+})(jQuery);
+
+function getJsonFromForm() {
+
 }
 
 /*
