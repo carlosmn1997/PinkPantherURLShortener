@@ -20,15 +20,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic/", "/queue/");
+        //config.enableSimpleBroker("/topic/", "/queue/");
+        config.enableSimpleBroker("/queue");
         config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        //registry.addEndpoint("/gs-guide-websocket").withSockJS();
+        registry.addEndpoint("/waitingSponsor").setAllowedOrigins("*").withSockJS();
 
-        registry.addEndpoint("/gs-guide-websocket").setHandshakeHandler(new DefaultHandshakeHandler() {
+        /*registry.addEndpoint("/waitingSponsor").setHandshakeHandler(new DefaultHandshakeHandler() {
 
             //Get sessionId from request and set it in Map attributes
             public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
@@ -39,7 +40,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     attributes.put("sessionId", session.getId());
                 }
                 return true;
-            }}).withSockJS();
+            }}).withSockJS();*/
     }
 
 }
