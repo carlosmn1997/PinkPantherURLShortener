@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.domain.ValidUrl;
 import urlshortener.team.repository.ClickRepository;
+import urlshortener.team.repository.QRRepository;
 import urlshortener.team.repository.ShortURLRepository;
 import urlshortener.team.domain.Click;
 import urlshortener.team.domain.ApiResponse;
@@ -27,6 +28,9 @@ public class UrlShortenerController {
 
 	@Autowired
 	protected ClickRepository clickRepository;
+
+	@Autowired
+	protected QRRepository qrRepository;
 
 	@RequestMapping(value = "/{id:(?!link|index).*}", method = RequestMethod.GET)
 	public ResponseEntity<?> redirectTo(@PathVariable String id,
@@ -57,7 +61,7 @@ public class UrlShortenerController {
 			su = shortURLRepository.save(su);
 			if(su != null) {
 				if(qr) {
-					// LLAMAR AQUÍ A MÉTODO DE CREAR QR
+					qrRepository.createQR(su.getHash(),su.getUri().toString());
 				}
 				HttpHeaders h = new HttpHeaders();
 				h.setLocation(su.getUri());

@@ -73,8 +73,6 @@ public class JobRepositoryTests {
 
 
 	@After
-	public void shutdown() {
-		db.shutdown();
-	}
+	public void shutdown() { db.shutdown();	}
 
 }

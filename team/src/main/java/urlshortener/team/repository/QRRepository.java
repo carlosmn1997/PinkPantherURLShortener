@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface QRRepository {
 
-    public boolean createQR(String uri);
+    boolean createQR(String hash,String uri);
 
 }
