@@ -13,8 +13,8 @@ import java.util.List;
 public class CsvRepositoryFixture {
 
   public static MultipartFile getCorrectCsv() {
-    File file = new File("csvCorrect.csv");
-    //File file = new File("C:\\Users\\Carlos\\Documents\\GitHub\\urlshortener\\team\\src\\test\\java\\urlshortener\\team\\repository\\fixture\\csvCorrect.csv");
+    //File file = new File("csvCorrect.csv");
+    File file = new File("C:\\Users\\Carlos\\Documents\\GitHub\\urlshortener\\team\\src\\test\\java\\urlshortener\\team\\repository\\fixture\\csvCorrect.csv");
     try {
       FileInputStream input = new FileInputStream(file);
       MultipartFile multipartFile = new MockMultipartFile("myURIS",

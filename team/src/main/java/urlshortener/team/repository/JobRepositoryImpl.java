@@ -32,8 +32,8 @@ public class JobRepositoryImpl implements JobRepository {
     }
     return new Job(rs.getString("hash"), rs.getInt("converted"), rs.getInt("total"), null, result);
   };
-  @Autowired
-  protected ShortURLRepository shortURLRepository;
+
+
   private JdbcTemplate jdbc;
 
   public JobRepositoryImpl(JdbcTemplate jdbc) {
@@ -105,58 +105,10 @@ public class JobRepositoryImpl implements JobRepository {
               "update job set hash=?, converted=?, total=?, result=? where hash=?",
               j1.getHash(), j1.getConverted(), j1.getTotal(),
               blob, j1.getHash());
+      System.out.println("EXITOOOO");
     } catch (Exception e) {
       e.printStackTrace();
       //log.debug("When update for hash {}",  su.getHash(), e);
     }
-  }
-
-  @Override
-  public List<String> shortUris(List<String> urisToShort, Job job) {
-    List<String> urisShorted = new ArrayList<>();
-    for (String uri : urisToShort) {
-      // Save URI
-      ShortURL su = new ShortURL(uri, null, null, false, false);
-      su = shortURLRepository.save(su);
-      if (su != null) {
-        urisShorted.add(su.getUri().toString());
-      } else {
-        urisShorted.add("No alcanzable");
-      }
-      //urisShorted.add("http://localhostMock:8080/123");
-      System.out.println("Llevo: " + job.getConverted());
-      job.setConverted(job.getConverted() + 1);
-      update(job);
-      try {
-        TimeUnit.SECONDS.sleep(5);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    return urisShorted;
-  }
-
-  @Override
-  public List<CsvFormat> createCsv(List<String> original, List<String> formatted) {
-    List<CsvFormat> list = new ArrayList<>();
-    int i = 0;
-    while (i < original.size()) {
-      CsvFormat file = new CsvFormat(original.get(i), formatted.get(i));
-      list.add(file);
-      i++;
-    }
-    return list;
-  }
-
-  @Override
-  @Async
-  public void processJob(Job job, List<String> urisToShort) {
-    List<String> urisShorted = shortUris(urisToShort, job);
-
-    // when it has finished, create CSV
-    List<CsvFormat> csvList = createCsv(urisToShort, urisShorted);
-    job = findByKey(job.getHash()); // Because it has been updated
-    job.setResult(csvList);
-    update(job);
   }
 }

@@ -1,7 +1,6 @@
 package urlshortener.team.repository;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import urlshortener.team.config.PersistenceContext;
 import urlshortener.team.domain.Job;
-import urlshortener.team.repository.fixture.CsvRepositoryFixture;
 import urlshortener.team.repository.fixture.JobRepositoryFixture;
 
 import static org.junit.Assert.*;
@@ -28,8 +26,7 @@ public class JobRepositoryTests {
   private JdbcTemplate jdbc;
 
   @Before
-  public void setup() {
-  }
+  public void setup() { }
 
   @Test
   public void thatFindByKeyReturnsAJob() {
@@ -40,35 +37,23 @@ public class JobRepositoryTests {
   }
 
   @Test
-  @Ignore
   public void thatFindByKeyReturnsNullWhenFails() {
-    repository.save(JobRepositoryFixture.jobExample());
     assertNull(repository.findByKey(JobRepositoryFixture.jobExample().getHash()));
   }
 
 
   @Test
-  @Ignore
-  public void thatSavePersistsTheJob() {
+  public void thatSavePersistsAndUpdateTheJob() {
     Job j = repository.save(JobRepositoryFixture.jobExample());
     assertSame(jdbc.queryForObject("select count(*) from JOB",
             Integer.class), 1);
     assertNotNull(j);
     assertEquals(j.getHash(), "0");
-  }
 
-  @Test
-  public void thatProcessTheJobProperly() {
-    Job j = repository.save(JobRepositoryFixture.jobWithUris());
-    repository.processJob(j, CsvRepositoryFixture.urisToShort());
-    try {
-      Thread.sleep(20000);
-      j = repository.findByKey(JobRepositoryFixture.jobWithUris().getHash());
-      assertNotNull(j.getResult());
-      assertEquals(j.getResult().size(), 3);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    j.setHash("1");
+    repository.update(j);
+      assertNotNull(j);
+      assertEquals(j.getHash(), "1");
   }
 
 
