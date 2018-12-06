@@ -1,27 +1,27 @@
 package urlshortener.team.repository;
 
-import java.util.List;
-
 import urlshortener.team.domain.ShortURL;
+
+import java.util.List;
 
 public interface ShortURLRepository {
 
-	ShortURL findByKey(String id);
+  ShortURL findByKey(String id);
 
-	List<ShortURL> findByTarget(String target);
+  List<ShortURL> findByTarget(String target);
 
-	ShortURL save(ShortURL su);
+  ShortURL save(ShortURL su);
 
-	ShortURL mark(ShortURL urlSafe, boolean safeness);
+  ShortURL mark(ShortURL urlSafe, boolean safeness);
 
-	void update(ShortURL su);
+  void update(ShortURL su);
 
-	void delete(String id);
+  void delete(String id);
 
-	Long count();
+  Long count();
 
-	List<ShortURL> list(Long limit, Long offset);
+  List<ShortURL> list(Long limit, Long offset);
 
-	List<ShortURL> getAllToCheck();
+  List<ShortURL> getAllToCheck();
 
 }

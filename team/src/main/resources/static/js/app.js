@@ -1,13 +1,13 @@
 $(document).ready(
-    function() {
+    function () {
         $("#shortener").submit(
-            function(event) {
+            function (event) {
                 event.preventDefault();
                 $.ajax({
-                    type : "POST",
-                    url : "/short",
-                    data : $("#shortener").serialize({ checkboxesAsBools: true }),
-                    success : function(msg) {
+                    type: "POST",
+                    url: "/short",
+                    data: $("#shortener").serialize({checkboxesAsBools: true}),
+                    success: function (msg) {
                         $("#result").html(
                             "<div class='alert alert-success lead'><a target='_blank' href='"
                             + msg.uri
@@ -15,7 +15,7 @@ $(document).ready(
                             + msg.uri
                             + "</a></div>");
                     },
-                    error : function() {
+                    error: function () {
                         $("#result").html(
                             "<div class='alert alert-danger lead'>ERROR</div>");
                     }
@@ -24,8 +24,8 @@ $(document).ready(
     });
 
 
-$(function(){
-    $("#uploadCsv").on("submit", function(e){
+$(function () {
+    $("#uploadCsv").on("submit", function (e) {
         e.preventDefault();
         var f = $(this);
         var formData = new FormData(document.getElementById("uploadCsv"));
@@ -40,7 +40,7 @@ $(function(){
             contentType: false,
             processData: false
         })
-            .done(function(res){
+            .done(function (res) {
                 //$("#mensaje").html("Respuesta: " + res);
                 console.log(res);
                 getCsvStatus(res);
@@ -48,11 +48,11 @@ $(function(){
     });
 });
 
-function getCsvStatus(url){
+function getCsvStatus(url) {
     $.ajax({
         url: url
     })
-        .done(function(res){
+        .done(function (res) {
             console.log(res);
             setTimeout(getCsvStatus(url), 50000);
         });
@@ -89,7 +89,7 @@ function getCsvStatus(url){
                     null :
                     $.isArray(val) ?
                         $.map(val, function (val, i) {
-                            return { name: elem.name, value: val };
+                            return {name: elem.name, value: val};
                         }) :
                         {
                             name: elem.name,
