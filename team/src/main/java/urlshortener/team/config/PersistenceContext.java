@@ -39,7 +39,4 @@ public class PersistenceContext {
     return new StatsRepositoryImpl(jdbc);
   }
 
-  @Bean
-  JobService jobService() { return new JobServiceImpl(); }
-
 }

@@ -56,9 +56,9 @@ public class CsvController {
   public ResponseEntity<Job> job(@PathVariable String id) {
     Job j = jobRepository.findByKey(id);
     if (j != null) {
-      HttpHeaders h = new HttpHeaders();
-      h.setLocation(j.getUriResult());
-      return new ResponseEntity<>(j, h, HttpStatus.OK);
+      //HttpHeaders h = new HttpHeaders();
+      //h.setLocation(j.getUriResult());
+      return new ResponseEntity<>(j, HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -71,7 +71,7 @@ public class CsvController {
     if (j != null && j.getResult() != null) {
 
       jobService.generateCsvResponse(j, response);
-
+      response.setContentType("text/csv");
       return new ResponseEntity<>(HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

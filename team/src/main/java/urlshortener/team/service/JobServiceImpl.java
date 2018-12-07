@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Service
 public class JobServiceImpl implements JobService {
 
     @Autowired
@@ -69,13 +68,11 @@ public class JobServiceImpl implements JobService {
       } else {
         urisShorted.add("No alcanzable");
       }
-      //urisShorted.add("http://localhostMock:8080/123");
       System.out.println("Llevo: " + job.getConverted());
       job.setConverted(job.getConverted() + 1);
       jobRepository.update(job);
-      System.out.println("DESPUES UPDATE");
       try {
-        //TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(1);
       } catch (Exception e) {
         e.printStackTrace();
       }

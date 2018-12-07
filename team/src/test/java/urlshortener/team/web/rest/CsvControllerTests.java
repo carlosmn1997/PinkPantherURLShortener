@@ -15,6 +15,7 @@ import urlshortener.team.repository.JobRepository;
 import urlshortener.team.service.JobService;
 import urlshortener.team.web.rest.fixture.CsvFixture;
 
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -22,66 +23,68 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class CsvControllerTests {
 
-  @Autowired
-  protected JobService jobService;
+    private MockMvc mockMvc;
 
-  private MockMvc mockMvc;
+    @Mock
+    protected JobRepository jobRepository;
+
+    @Mock
+    protected JobService jobService;
+
+    @InjectMocks
+    private CsvController csv;
 
 
-  @Before
-  public void setup() { }
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        this.mockMvc = MockMvcBuilders.standaloneSetup(csv).build();
+    }
+
 
   @Test
-  @Ignore
   public void thatCsvUploadResponseIsOK() throws Exception {
     MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "application/csv", "URis to short".getBytes());
-    //when(jobRepository.save(any())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
+    when(jobRepository.save(any())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
 
     // For void functions
-    //doNothing().when(jobRepository).processJob(any(), any());
-    //when(jobRepository.processJob(any(), ArgumentMatchers.<String>anyList())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
-    //when(jobRepository.processJob(any(), null)).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
-
+    doNothing().when(jobService).processJob(any(), any());
 
     mockMvc.perform(multipart("/uploadCSV")
             .file(file))
             .andExpect(status().is(201))
             .andExpect(content().string("http://localhost:8080/job/0"));
-    //.andDo(print());
   }
 
   @Test
-  @Ignore
   public void thatFileIsWrongParsingIt() throws Exception {
     MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "application/csv", "URis to short".getBytes());
-    //when(csvRepository.parserCsv(file)).thenReturn(null);
+    when(jobService.parserCsv(file)).thenReturn(null);
 
     mockMvc.perform(multipart("/uploadCSV")
             .file(file))
             .andExpect(status().is(400));
-    //.andDo(print());
   }
 
   @Test
-  @Ignore
   public void thatJobIsAnsweringOk() throws Exception {
-    //when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobNotFinished());
+      when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobNotFinished());
 
-    //   mockMvc.perform(get("/job/{id}", "someKey").header("Origin","*")).andDo(print())
-    //         .andExpect(status().isOk());
-    //.andExpect(jsonPath("$.hash", is("0")))
-    //.andExpect(jsonPath("$.converted", is("3")))
-    //.andExpect(jsonPath("$.total", is("10")));
+    mockMvc.perform(get("/job/{id}", "someKey")).andDo(print())
+             .andExpect(status().isOk())
+             .andExpect(jsonPath("$.hash", is("0")))
+                .andExpect(jsonPath("$.converted", is(3)))
+    .andExpect(jsonPath("$.total", is(10)));
   }
 
   @Test
-  @Ignore
   public void thatResultIsOk() throws Exception {
-    //when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobFinished());
+    when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobFinished());
 
     mockMvc.perform(get("/result/{id}", "someKey")).andDo(print())
             .andExpect(status().isOk())

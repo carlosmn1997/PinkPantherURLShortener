@@ -105,7 +105,6 @@ public class JobRepositoryImpl implements JobRepository {
               "update job set hash=?, converted=?, total=?, result=? where hash=?",
               j1.getHash(), j1.getConverted(), j1.getTotal(),
               blob, j1.getHash());
-      System.out.println("EXITOOOO");
     } catch (Exception e) {
       e.printStackTrace();
       //log.debug("When update for hash {}",  su.getHash(), e);

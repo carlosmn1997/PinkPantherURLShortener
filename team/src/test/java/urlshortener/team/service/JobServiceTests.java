@@ -1,30 +1,37 @@
 package urlshortener.team.service;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 import urlshortener.team.config.PersistenceContext;
+import urlshortener.team.config.ServiceContext;
 import urlshortener.team.domain.CsvFormat;
 import urlshortener.team.domain.Job;
-import urlshortener.team.repository.JobRepository;
-import urlshortener.team.repository.fixture.CsvRepositoryFixture;
+import urlshortener.team.repository.*;
+import urlshortener.team.repository.fixture.ShortURLFixture;
+import urlshortener.team.service.fixture.CsvRepositoryFixture;
 import urlshortener.team.repository.fixture.JobRepositoryFixture;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.HSQL;
 
 @RunWith(SpringRunner.class)
-@Import(PersistenceContext.class)
-@JdbcTest // To run the server
+@SpringBootTest
 public class JobServiceTests {
 
     @Autowired
@@ -33,8 +40,10 @@ public class JobServiceTests {
     @Autowired
     private JobService jobService;
 
+
     @Before
     public void setup() {
+
     }
 
   @Test
@@ -46,15 +55,10 @@ public class JobServiceTests {
   }
 
   @Test
-  @Ignore
   public void thatParseAFileIncorrectReturnNull() {
-
-  }
-
-  @Test
-  @Ignore
-  public void thatShortsUrisProperly() {
-
+      MultipartFile incorrectCsv = CsvRepositoryFixture.getIncorrectCsv();
+      List<String> result = jobService.parserCsv(incorrectCsv);
+      assertNull(result);
   }
 
   @Test
@@ -67,12 +71,11 @@ public class JobServiceTests {
   }
 
   @Test
-  @Ignore
   public void thatProcessTheJobProperly() {
     Job j = jobRepository.save(JobRepositoryFixture.jobWithUris());
     jobService.processJob(j, CsvRepositoryFixture.urisToShort());
     try {
-      Thread.sleep(10000);
+      Thread.sleep(5000);
       j = jobRepository.findByKey(JobRepositoryFixture.jobWithUris().getHash());
       assertNotNull(j.getResult());
       assertEquals(j.getResult().size(), 3);
