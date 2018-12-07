@@ -29,6 +29,9 @@ public class UrlShortenerController {
   @Autowired
   protected ShortUrlService shortUrlService;
 
+  @Autowired
+  protected UriService uriService;
+
   @GetMapping("/{id:(?!link|index).*}")
   public ResponseEntity<?> redirectTo(@PathVariable String id,
                                       HttpServletRequest request) {
@@ -49,8 +52,7 @@ public class UrlShortenerController {
                                      @RequestParam(value = "qr") boolean qr,
                                      @RequestParam(value = "sponsor", required = false) String sponsor,
                                      HttpServletRequest request) {
-    UriService url = new UriServiceImpl();
-    if (!url.checkSyntax(uri)) {
+    if (!uriService.checkSyntax(uri)) {
       throw new BadRequestException("Bad syntax");
     }
     ShortURL su = shortUrlService.createAndSaveShortUrl(uri, sponsor,
