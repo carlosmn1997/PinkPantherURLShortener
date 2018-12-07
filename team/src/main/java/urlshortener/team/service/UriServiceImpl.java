@@ -1,25 +1,21 @@
-package urlshortener.team.domain;
+package urlshortener.team.service;
 
 import org.apache.commons.validator.routines.UrlValidator;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class ValidUrl {
+public class UriServiceImpl implements UriService {
 
-  private String url;
-
-  public ValidUrl(String url) {
-    this.url = url;
-  }
-
-  public boolean checkSyntax() {
+  @Override
+  public boolean checkSyntax(String url) {
     UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
     return urlValidator.isValid(url);
   }
 
-  public boolean checkAlive() {
-    if (!checkSyntax()) {
+  @Override
+  public boolean checkAlive(String url) {
+    if (!checkSyntax(url)) {
       return false;
     } else {
       try {

@@ -32,6 +32,7 @@ public class ShortURL {
   /*
    * ShortURL's constructor
    */
+  @Deprecated
   public ShortURL(String target, String sponsor, String ip, Boolean checkStatus, Boolean qr) {
     this.hash = Hashing.murmur3_32().hashString(target + sponsor + ip
             + checkStatus.toString() + qr.toString(), StandardCharsets.UTF_8).toString();
@@ -52,7 +53,8 @@ public class ShortURL {
 
   public ShortURL(String hash, String target, URI uri, String sponsor,
                   Date created, String owner, Integer mode, Boolean safe,
-                  String ip, String country, Boolean checkStatus, Boolean aliveOnLastCheck) {
+                  String ip, String country, Boolean checkStatus, Boolean aliveOnLastCheck,
+                  Boolean qr) {
     this.hash = hash;
     this.target = target;
     this.uri = uri;
@@ -65,6 +67,7 @@ public class ShortURL {
     this.country = country;
     this.checkStatus = checkStatus;
     this.aliveOnLastCheck = aliveOnLastCheck;
+    this.qr = qr;
   }
 
   public ShortURL(String hash, String target, URI uri, String sponsor,
@@ -87,8 +90,7 @@ public class ShortURL {
     this.qrImage = qrImage;
   }
 
-  public ShortURL() {
-  }
+  public ShortURL() {}
 
   public String getHash() {
     return hash;

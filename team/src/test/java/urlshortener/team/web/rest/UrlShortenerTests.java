@@ -10,7 +10,8 @@ import org.mockito.stubbing.Answer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import urlshortener.team.domain.ShortURL;
-import urlshortener.team.domain.ValidUrl;
+import urlshortener.team.service.UriService;
+import urlshortener.team.service.UriServiceImpl;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.ShortURLRepository;
 import urlshortener.team.web.rest.fixture.ShortURLFixture;
@@ -35,7 +36,7 @@ public class UrlShortenerTests {
   private ShortURLRepository shortURLRepository;
 
   @Mock
-  private ValidUrl validUrl;
+  private UriService uriService;
 
   @InjectMocks
   private UrlShortenerController urlShortener;
@@ -69,7 +70,7 @@ public class UrlShortenerTests {
   @Test
   public void thatShortenerCreatesARedirectIfTheURLisOK() throws Exception {
     configureTransparentSave();
-    when(validUrl.checkSyntax()).thenReturn(true);
+    when(uriService.checkSyntax(any())).thenReturn(true);
 
     mockMvc.perform(post("/short").param("uri", "http://example.com/")
             .param("periodicity", "true")
@@ -83,7 +84,7 @@ public class UrlShortenerTests {
   @Test
   public void thatShortenerCreatesARedirectWithSponsor() throws Exception {
     configureTransparentSave();
-    when(validUrl.checkSyntax()).thenReturn(true);
+    when(uriService.checkSyntax(any())).thenReturn(true);
 
     mockMvc.perform(
             post("/short").param("uri", "http://example.com/").param(
@@ -98,7 +99,7 @@ public class UrlShortenerTests {
   @Test
   public void thatShortenerFailsIfTheURLisWrong() throws Exception {
     configureTransparentSave();
-    when(validUrl.checkSyntax()).thenReturn(false);
+    when(uriService.checkSyntax(any())).thenReturn(false);
 
     mockMvc.perform(post("/short").param("uri", "someKey")
             .param("periodicity", "true")
@@ -108,7 +109,7 @@ public class UrlShortenerTests {
 
   @Test
   public void thatShortenerFailsIfTheRepositoryReturnsNull() throws Exception {
-    when(validUrl.checkSyntax()).thenReturn(true);
+    when(uriService.checkSyntax(any())).thenReturn(true);
     when(shortURLRepository.save(any(ShortURL.class))).thenReturn(null);
 
     mockMvc.perform(post("/short").param("uri", "someKey")
@@ -120,7 +121,7 @@ public class UrlShortenerTests {
   @Test
   public void thatCheckStatusIsTrueIfPeriodicityIsTrue() throws Exception {
     configureTransparentSave();
-    when(validUrl.checkSyntax()).thenReturn(true);
+    when(uriService.checkSyntax(any())).thenReturn(true);
 
     mockMvc.perform(post("/short").param("uri", "http://example.com/")
             .param("periodicity", "true")
@@ -132,7 +133,7 @@ public class UrlShortenerTests {
   @Test
   public void thatCheckStatusIsFalseIfPeriodicityIsFalse() throws Exception {
     configureTransparentSave();
-    when(validUrl.checkSyntax()).thenReturn(true);
+    when(uriService.checkSyntax(any())).thenReturn(true);
 
     mockMvc.perform(post("/short").param("uri", "http://example.com/")
             .param("periodicity", "false")

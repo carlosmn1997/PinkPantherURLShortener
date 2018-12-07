@@ -1,11 +1,7 @@
 package urlshortener.team.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
@@ -13,13 +9,11 @@ import org.supercsv.prefs.CsvPreference;
 import urlshortener.team.domain.CsvFormat;
 import urlshortener.team.domain.Job;
 import urlshortener.team.domain.ShortURL;
-import urlshortener.team.domain.ValidUrl;
 import urlshortener.team.repository.JobRepository;
 import urlshortener.team.repository.ShortURLRepository;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +26,9 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private ShortURLRepository shortURLRepository;
 
+    @Autowired
+    private UriService uriService;
+
     @Override
     public List<String> parserCsv(MultipartFile multipart) {
         BufferedReader br;
@@ -41,8 +38,7 @@ public class JobServiceImpl implements JobService {
             InputStream is = multipart.getInputStream();
             br = new BufferedReader(new InputStreamReader(is));
             while ((line = br.readLine()) != null) {
-                ValidUrl url = new ValidUrl(line);
-                boolean ok = url.checkSyntax();
+                boolean ok = uriService.checkSyntax(line);
                 if (ok) {
                     result.add(line);
                 } else {

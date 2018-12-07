@@ -1,29 +1,22 @@
 package urlshortener.team.web.rest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import urlshortener.team.domain.ApiResponse;
-import urlshortener.team.domain.Click;
 import urlshortener.team.domain.ShortURL;
-import urlshortener.team.domain.ValidUrl;
+import urlshortener.team.service.ShortUrlService;
+import urlshortener.team.service.UriService;
+import urlshortener.team.service.UriServiceImpl;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.QRRepository;
 import urlshortener.team.repository.ShortURLRepository;
-
 import javax.servlet.http.HttpServletRequest;
-import java.net.URI;
-import java.sql.Date;
 
-@Controller
+@RestController
 public class UrlShortenerController {
-  private static final Logger LOG = LoggerFactory
-          .getLogger(UrlShortenerController.class);
   @Autowired
   protected ShortURLRepository shortURLRepository;
 
@@ -33,7 +26,10 @@ public class UrlShortenerController {
   @Autowired
   protected QRRepository qrRepository;
 
-  @RequestMapping(value = "/{id:(?!link|index).*}", method = RequestMethod.GET)
+  @Autowired
+  protected ShortUrlService shortUrlService;
+
+  @GetMapping("/{id:(?!link|index).*}")
   public ResponseEntity<?> redirectTo(@PathVariable String id,
                                       HttpServletRequest request) {
     ShortURL l = shortURLRepository.findByKey(id);
@@ -43,22 +39,22 @@ public class UrlShortenerController {
     if (l.getSponsor() != null) {
       return ResponseEntity.ok(SponsorController.generateHtml(l));
     }
-    createAndSaveClick(id, extractIP(request));
-    return createSuccessfulRedirectToResponse(l);
+    shortUrlService.createAndSaveClick(id, request.getRemoteAddr());
+    return shortUrlService.createSuccessfulRedirectToResponse(l);
   }
 
-  @RequestMapping(value = "/short", method = RequestMethod.POST)
+  @PostMapping("/short")
   public ResponseEntity<?> shortener(@RequestParam("uri") String uri,
                                      @RequestParam(value = "periodicity") boolean periodicity,
                                      @RequestParam(value = "qr") boolean qr,
                                      @RequestParam(value = "sponsor", required = false) String sponsor,
                                      HttpServletRequest request) {
-    ValidUrl url = new ValidUrl(uri);
-    if (!url.checkSyntax()) {
+    UriService url = new UriServiceImpl();
+    if (!url.checkSyntax(uri)) {
       throw new BadRequestException("Bad syntax");
     }
-    ShortURL su = new ShortURL(uri, sponsor, extractIP(request), periodicity, qr);
-    su = shortURLRepository.save(su);
+    ShortURL su = shortUrlService.createAndSaveShortUrl(uri, sponsor,
+            request.getRemoteAddr(), periodicity, qr);
     if (su == null) {
       throw new BadRequestException("Cannot save the url");
     }
@@ -70,6 +66,21 @@ public class UrlShortenerController {
     return new ResponseEntity<>(su, h, HttpStatus.CREATED);
   }
 
+  @GetMapping("/{id}/alive")
+  public ResponseEntity<?> isAlive(@PathVariable String id) {
+    ShortURL su = shortURLRepository.findByKey(id);
+    if(su == null) {
+      throw new NotFoundException(id + " does not reference any url");
+    }
+    if(!su.isCheckStatus()) {
+      throw new NotFoundException("Check status is false for " + id);
+    }
+    return new ResponseEntity<>(su.isAliveOnLastCheck(), HttpStatus.OK);
+  }
+
+   /***********************
+   *  EXCEPTION HANDLERS  *
+   ***********************/
   class BadRequestException extends RuntimeException {
 
     public BadRequestException(String msg) {
@@ -78,45 +89,23 @@ public class UrlShortenerController {
   }
 
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(BadRequestException.class)
   @ResponseBody
+  @ExceptionHandler(BadRequestException.class)
   ApiResponse handleBadRequest(BadRequestException ex) {
-    return new ApiResponse(HttpStatus.BAD_REQUEST.value(), "INV", ex.getMessage());
+    return new ApiResponse(HttpStatus.BAD_REQUEST.value(), "error", ex.getMessage());
   }
 
-  @RequestMapping(value = "/{id}/alive", method = RequestMethod.GET)
-  public ResponseEntity<?> isAlive(@PathVariable String id) {
-    ShortURL su = shortURLRepository.findByKey(id);
-    if (su != null) { // id exists
-      if (su.isCheckStatus()) { // check was enabled
-        return new ResponseEntity<>(su.isAliveOnLastCheck(), HttpStatus.OK);
-      } else { // check was not enabled
-        ApiResponse a = new ApiResponse(HttpStatus.NOT_FOUND.value(), "INV", "Check status is false for " + id);
-        return new ResponseEntity<>(a, HttpStatus.NOT_FOUND);
-      }
-    } else { // id does not exist
-      ApiResponse a = new ApiResponse(HttpStatus.NOT_FOUND.value(), "INV", id + " does not reference any url");
-      return new ResponseEntity<>(a, HttpStatus.NOT_FOUND);
+  class NotFoundException extends RuntimeException {
+
+    public NotFoundException(String msg) {
+      super(msg);
     }
   }
 
-  /*
-   * PRIVATE METHODS
-   */
-  private void createAndSaveClick(String hash, String ip) {
-    Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
-            null, null, null, ip, null);
-    cl = clickRepository.save(cl);
-    LOG.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId() + "]" : "[" + hash + "] was not saved");
-  }
-
-  private String extractIP(HttpServletRequest request) {
-    return request.getRemoteAddr();
-  }
-
-  private ResponseEntity<?> createSuccessfulRedirectToResponse(ShortURL l) {
-    HttpHeaders h = new HttpHeaders();
-    h.setLocation(URI.create(l.getTarget()));
-    return new ResponseEntity<>(h, HttpStatus.valueOf(l.getMode()));
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  @ExceptionHandler(NotFoundException.class)
+  ApiResponse handleNotFound(BadRequestException ex) {
+    return new ApiResponse(HttpStatus.NOT_FOUND.value(), "error", ex.getMessage());
   }
 }
