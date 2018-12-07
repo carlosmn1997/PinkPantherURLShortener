@@ -47,47 +47,47 @@ public class CsvControllerTests {
     }
 
 
-  @Test
-  public void thatCsvUploadResponseIsOK() throws Exception {
-    MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "application/csv", "URis to short".getBytes());
-    when(jobRepository.save(any())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
+    @Test
+    public void thatCsvUploadResponseIsOK() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "application/csv", "URis to short".getBytes());
+        when(jobRepository.save(any())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
 
-    // For void functions
-    doNothing().when(jobService).processJob(any(), any());
+        // For void functions
+        doNothing().when(jobService).processJob(any(), any());
 
-    mockMvc.perform(multipart("/uploadCSV")
-            .file(file))
-            .andExpect(status().is(201))
-            .andExpect(content().string("http://localhost:8080/job/0"));
-  }
+        mockMvc.perform(multipart("/uploadCSV")
+                .file(file))
+                .andExpect(status().is(201))
+                .andExpect(content().string("http://localhost:8080/job/0"));
+    }
 
-  @Test
-  public void thatFileIsWrongParsingIt() throws Exception {
-    MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "application/csv", "URis to short".getBytes());
-    when(jobService.parserCsv(file)).thenReturn(null);
+    @Test
+    public void thatFileIsWrongParsingIt() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "application/csv", "URis to short".getBytes());
+        when(jobService.parserCsv(file)).thenReturn(null);
 
-    mockMvc.perform(multipart("/uploadCSV")
-            .file(file))
-            .andExpect(status().is(400));
-  }
+        mockMvc.perform(multipart("/uploadCSV")
+                .file(file))
+                .andExpect(status().is(400));
+    }
 
-  @Test
-  public void thatJobIsAnsweringOk() throws Exception {
-      when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobNotFinished());
+    @Test
+    public void thatJobIsAnsweringOk() throws Exception {
+        when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobNotFinished());
 
-    mockMvc.perform(get("/job/{id}", "someKey")).andDo(print())
-             .andExpect(status().isOk())
-             .andExpect(jsonPath("$.hash", is("0")))
+        mockMvc.perform(get("/job/{id}", "someKey")).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hash", is("0")))
                 .andExpect(jsonPath("$.converted", is(3)))
-    .andExpect(jsonPath("$.total", is(10)));
-  }
+                .andExpect(jsonPath("$.total", is(10)));
+    }
 
-  @Test
-  public void thatResultIsOk() throws Exception {
-    when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobFinished());
+    @Test
+    public void thatResultIsOk() throws Exception {
+        when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobFinished());
 
-    mockMvc.perform(get("/result/{id}", "someKey")).andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(content().contentType("text/csv"));
-  }
+        mockMvc.perform(get("/result/{id}", "someKey")).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("text/csv"));
+    }
 }
