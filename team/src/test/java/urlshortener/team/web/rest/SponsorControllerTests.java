@@ -1,5 +1,6 @@
 package urlshortener.team.web.rest;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class SponsorControllerTests {
   private ShortURLRepository shortURLRepository;
 
 
-  @Test
+  @Ignore
   public void thatRedirectToWithSponsorReturnsTemporaryRedirectIfKeyExists() throws Exception {
 
     // Data setup
