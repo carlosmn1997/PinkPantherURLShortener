@@ -55,7 +55,6 @@ public class CsvIntegrationTests {
   }
 
   @Test
-  @Ignore
   public void testCsvCorrect() throws Exception {
     Resource testFile = getTestFile();
     ResponseEntity<String> entity = uploadCsv(testFile);
@@ -64,21 +63,20 @@ public class CsvIntegrationTests {
     assertThat(entity.getBody(), is("http://localhost:8080/job/0"));
 
     // Get the job
-    entity = restTemplate.getForEntity(entity.getBody(), String.class);
+    entity = restTemplate.getForEntity("/job/0", String.class);
     assertThat(entity.getStatusCode(), is(HttpStatus.OK));
     ReadContext rc = JsonPath.parse(entity.getBody());
 
     // TODO hacer un bucle y retry after
     assertThat(rc.read("$.hash"), is("0"));
-    assertThat(rc.read("$.converted"), is(0));
     assertThat(rc.read("$.total"), is(3));
 
-    Thread.sleep(30000);
+    Thread.sleep(10000);
 
     // Get the result
-    entity = restTemplate.getForEntity("http://localhost:8080/result/0", String.class);
+    entity = restTemplate.getForEntity("/result/0", String.class);
     assertThat(entity.getStatusCode(), is(HttpStatus.OK));
-    assertThat(entity.getHeaders().getContentType(), is(new MediaType("text", "csv", Charset.forName("UTF-8"))));
+    assertThat(entity.getHeaders().getContentType(), is(new MediaType("text", "csv", Charset.forName("ISO-8859-1"))));
   }
 
   @Test

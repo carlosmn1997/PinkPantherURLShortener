@@ -14,6 +14,8 @@ import urlshortener.team.repository.ShortURLRepository;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -52,45 +54,45 @@ public class JobServiceImpl implements JobService {
         return result;
     }
 
-  @Override
-  public List<String> shortUris(List<String> urisToShort, Job job) {
-    List<String> urisShorted = new ArrayList<>();
-    for (String uri : urisToShort) {
-      // Save URI
-      ShortURL su = new ShortURL(uri, null, null, false, false);
-      su = shortURLRepository.save(su);
-      if (su != null) {
-        urisShorted.add(su.getUri().toString());
-      } else {
-        urisShorted.add("No alcanzable");
-      }
-      System.out.println("Llevo: " + job.getConverted());
-      job.setConverted(job.getConverted() + 1);
-      jobRepository.update(job);
-      try {
-        TimeUnit.SECONDS.sleep(1);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+    @Override
+    public List<String> shortUris(List<String> urisToShort, Job job) {
+        List<String> urisShorted = new ArrayList<>();
+        for (String uri : urisToShort) {
+            // Save URI
+            ShortURL su = new ShortURL(uri, null, null, false, false);
+            su = shortURLRepository.save(su);
+            if (su != null) {
+                urisShorted.add(su.getUri().toString());
+            } else {
+                urisShorted.add("No alcanzable");
+            }
+            System.out.println("Llevo: " + job.getConverted());
+            job.setConverted(job.getConverted() + 1);
+            jobRepository.update(job);
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return urisShorted;
     }
-    return urisShorted;
-  }
 
-  @Override
-  public List<CsvFormat> createCsv(List<String> original, List<String> formatted) {
-    List<CsvFormat> list = new ArrayList<>();
-    int i = 0;
-    while (i < original.size()) {
-      CsvFormat file = new CsvFormat(original.get(i), formatted.get(i));
-      list.add(file);
-      i++;
+    @Override
+    public List<CsvFormat> createCsv(List<String> original, List<String> formatted) {
+        List<CsvFormat> list = new ArrayList<>();
+        int i = 0;
+        while (i < original.size()) {
+            CsvFormat file = new CsvFormat(original.get(i), formatted.get(i));
+            list.add(file);
+            i++;
+        }
+        return list;
     }
-    return list;
-  }
 
-  @Override
-   public void generateCsvResponse(Job j, HttpServletResponse response){
-        try{
+    @Override
+    public void generateCsvResponse(Job j, HttpServletResponse response) {
+        try {
             String csvFileName = "mock.csv";
 
             response.setContentType("text/csv");
@@ -118,20 +120,25 @@ public class JobServiceImpl implements JobService {
             }
 
             csvWriter.close();
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
-  }
+    }
 
-  @Override
-  @Async
-  public void processJob(Job job, List<String> urisToShort) {
-    List<String> urisShorted = shortUris(urisToShort, job);
+    @Override
+    @Async
+    public void processJob(Job job, List<String> urisToShort) {
+        List<String> urisShorted = shortUris(urisToShort, job);
 
-    // when it has finished, create CSV
-    List<CsvFormat> csvList = createCsv(urisToShort, urisShorted);
-    job = jobRepository.findByKey(job.getHash()); // Because it has been updated
-    job.setResult(csvList);
-    jobRepository.update(job);
-  }
+        // when it has finished, create CSV
+        List<CsvFormat> csvList = createCsv(urisToShort, urisShorted);
+        job = jobRepository.findByKey(job.getHash()); // Because it has been updated
+        job.setResult(csvList);
+        try {
+            job.setUriResult(new URI("http://localhost:8080/result/" + job.getHash()));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        jobRepository.update(job);
+    }
 }
