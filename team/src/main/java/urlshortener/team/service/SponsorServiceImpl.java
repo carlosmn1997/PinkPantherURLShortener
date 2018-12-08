@@ -21,13 +21,14 @@ public class SponsorServiceImpl implements SponsorService {
             "    <script src=\"js/stomp.js\"></script>\n" +
             "</head>\n" +
             "<body>\n" +
-            "    <div style=\"width:100%;height:50px;position:fixed;top:0px;\n" +
+            "<div style=\"width:100%;height:50px;position:fixed;top:0px;\n" +
             "        background-color:#ff3399;z-index:99999;\">\n" +
-            "        <span id=\"sponsor-skip-button\">Skip</span>\n" +
-            "        <span id=\"sponsor-countdown\" style=\"display:none;\">Wait 5 seconds...</span>\n" +
-            "        <div id=\"token\" style=\"display:none;\">${token}</div>\n" +
-            "    </div>\n" +
-            "    <div id=\"sponsor-body\" style=\"position:absolute;top:50px;\">${sponsorhtml}</div>\n" +
+            "    <span id=\"sponsor-skip-button\">Skip</span>\n" +
+            "    <span id=\"sponsor-go-button\" style=\"display:none;\">Go</span>\n" +
+            "    <span id=\"sponsor-countdown\" style=\"display:none;\">Wait 5 seconds...</span>\n" +
+            "    <div id=\"token\" style=\"display:none;\">${token}</div>\n" +
+            "</div>\n" +
+            "<div id=\"sponsor-body\" style=\"position:absolute;top:50px;\">${sponsorhtml}</div>\n" +
             "</body>\n" +
             "</html>";
 
