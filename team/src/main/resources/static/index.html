@@ -16,16 +16,16 @@
     <div class="container">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="#">Pink Panther</a>
+                <a class="navbar-brand" href="#" onclick="return goToHome()">PINK PANTHER</a>
             </div>
             <ul class="nav navbar-nav">
-                <li class="active"><a href="index.html">Home</a></li>
-                <li><a href="csv.html">CSV upload</a></li>
+                <li><a href="#" onclick="return goToCsv()">CSV upload</a></li>
+                <li><a href="#" onclick="return goToAlive()">Is alive?</a></li>
             </ul>
         </div>
     </div>
 </nav>
-<div class="container">
+<div id="idContenido" class="container">
     <div class="row">
         <div class="col-lg-12 text-center">
             <h1>URL Shortener</h1>
@@ -50,8 +50,6 @@
                 </div>
             </form>
         </div>
-    </div>
-
     </div>
 
     <div class="row">

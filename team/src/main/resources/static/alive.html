@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Is it alive?</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="webjars/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"
+          type="text/css"/>
+    <script src="webjars/jquery/2.1.4/jquery.min.js" type="text/javascript"></script>
+    <script src="webjars/bootstrap/3.3.5/js/bootstrap.min.js"
+            type="text/javascript"></script>
+    <script src="js/app.js" type="text/javascript">
+    </script>
+</head>
+<body>
+<div id ="barraNavegacion">
+    <script>
+        $("#barraNavegacion").load("index.html #barraNavegacion");
+    </script>
+</div>
+<div id="idContenido" class="container">
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            <h1>Is your url alive?</h1>
+            <p class="lead">Check either the url was alive or not in the last check</p>
+            <form action="" class="col-lg-12" id="alive" role="form">
+                <div class="input-group input-group-lg col-sm-offset-4 col-sm-4">
+                    <input class="form-control" id="uri" name="uri" placeholder="Enter the ID of the short url" type="text">
+                    <span class="input-group-btn"><button class="btn btn-lg btn-primary" type="submit">Check</button></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            <div class="col-sm-offset-4 col-sm-4 text-center">
+                <br/>
+                <div id="result"/>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

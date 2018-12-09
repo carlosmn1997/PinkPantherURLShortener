@@ -21,7 +21,32 @@ $(document).ready(
                     }
                 });
             });
-    });
+        $("#alive").submit(
+            function (event) {
+                event.preventDefault();
+                var url = "/" + this.value +"/alive";
+                alert(url + " Gola");
+                $.ajax({
+                    type: "GET",
+                    url: "/" + this.value +"/alive",
+                    success: function (msg) {
+                        $("#result").html(
+                            "<div class='alert alert-success lead'><a target='_blank'>"
+                            + msg
+                            + "</a></div>");
+                    },
+                    error: function () {
+                        $("#result").html(
+                            "<div class='alert alert-danger lead'>ERROR</div>");
+                    }
+                });
+            });
+    }
+    );
+
+function goToHome() { $("#idContenido").load("index.html #idContenido"); return true; }
+function goToCsv() { $("#idContenido").load("csv.html #idContenido"); return true; }
+function goToAlive() { $("#idContenido").load("alive.html #idContenido"); return true; }
 
 
 $(function () {
@@ -128,6 +153,7 @@ function getCsvStatus(url) {
 function getJsonFromForm() {
 
 }
+
 
 /*
 (function getCsvStatus(id) {
