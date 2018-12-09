@@ -20,7 +20,7 @@ import java.io.IOException;
 @RestController
 public class QRController {
   private static final Logger LOG = LoggerFactory
-          .getLogger(SponsorController.class);
+          .getLogger(QRController.class);
   @Autowired
   protected ShortURLRepository shortURLRepository;
 

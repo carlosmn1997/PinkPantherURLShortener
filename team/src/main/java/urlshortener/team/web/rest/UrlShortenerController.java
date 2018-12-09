@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import urlshortener.team.domain.ApiResponse;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.service.ShortUrlService;
+import urlshortener.team.service.SponsorService;
 import urlshortener.team.service.UriService;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.QRRepository;
@@ -31,6 +32,9 @@ public class UrlShortenerController {
   @Autowired
   protected UriService uriService;
 
+  @Autowired
+  protected SponsorService sponsorService;
+
   @GetMapping("/{id:(?!link|index).*}")
   public ResponseEntity<?> redirectTo(@PathVariable String id,
                                       HttpServletRequest request) {
@@ -39,7 +43,7 @@ public class UrlShortenerController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     if (l.getSponsor() != null) {
-      return ResponseEntity.ok(SponsorController.generateHtml(l));
+      return ResponseEntity.ok(sponsorService.generateHtml(l));
     }
     shortUrlService.createAndSaveClick(id, request.getRemoteAddr());
     return shortUrlService.createSuccessfulRedirectToResponse(l);

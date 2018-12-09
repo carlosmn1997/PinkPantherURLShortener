@@ -16,4 +16,7 @@ public class ServiceContext {
   @Bean
   ShortUrlService shortUrlService() { return new ShortUrlServiceImpl(); }
 
+  @Bean
+  SponsorService sponsorService() { return new SponsorServiceImpl(); }
+
 }
