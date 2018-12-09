@@ -59,7 +59,7 @@ public class CsvIntegrationTests {
     Resource testFile = getTestFile();
     ResponseEntity<String> entity = uploadCsv(testFile);
 
-    assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
+    assertThat(entity.getStatusCode(), is(HttpStatus.ACCEPTED));
     assertThat(entity.getBody(), is("http://localhost:8080/job/0"));
 
     // Get the job
@@ -67,11 +67,15 @@ public class CsvIntegrationTests {
     assertThat(entity.getStatusCode(), is(HttpStatus.OK));
     ReadContext rc = JsonPath.parse(entity.getBody());
 
-    // TODO hacer un bucle y retry after
-    assertThat(rc.read("$.hash"), is("0"));
-    assertThat(rc.read("$.total"), is(3));
+    while(rc.read("$.result")==null){
+        entity = restTemplate.getForEntity("/job/0", String.class);
+        assertThat(entity.getStatusCode(), is(HttpStatus.OK));;
 
-    Thread.sleep(10000);
+        String time = entity.getHeaders().getFirst("Retry-After");
+        assertThat(time, is("1"));
+        Thread.sleep(Integer.parseInt(time)*1000);
+        rc = JsonPath.parse(entity.getBody());
+    }
 
     // Get the result
     entity = restTemplate.getForEntity("/result/0", String.class);
