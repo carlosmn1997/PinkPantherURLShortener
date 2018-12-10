@@ -56,12 +56,12 @@ public class UrlShortenerController {
                                      @RequestParam(value = "sponsor", required = false) String sponsor,
                                      HttpServletRequest request) {
     if (!uriService.checkSyntax(uri)) {
-      throw new BadRequestException("Bad syntax");
+      throw new UrlShortenerController.BadRequestException("Bad syntax");
     }
     ShortURL su = shortUrlService.createAndSaveShortUrl(uri, sponsor,
             request.getRemoteAddr(), periodicity, qr);
     if (su == null) {
-      throw new BadRequestException("Cannot save the url");
+      throw new UrlShortenerController.BadRequestException("Cannot save the url");
     }
     if (qr) {
       qrRepository.createQR(su.getHash(), su.getUri().toString());
@@ -75,10 +75,10 @@ public class UrlShortenerController {
   public ResponseEntity<?> isAlive(@PathVariable String id) {
     ShortURL su = shortURLRepository.findByKey(id);
     if(su == null) {
-      throw new NotFoundException(id + " does not reference any url");
+      throw new UrlShortenerController.NotFoundException(id + " does not reference any url");
     }
     if(!su.isCheckStatus()) {
-      throw new NotFoundException("Check status is false for " + id);
+      throw new UrlShortenerController.NotFoundException("Check status is false for " + id);
     }
     return new ResponseEntity<>(su.isAliveOnLastCheck(), HttpStatus.OK);
   }
@@ -86,7 +86,7 @@ public class UrlShortenerController {
    /***********************
    *  EXCEPTION HANDLERS  *
    ***********************/
-  class BadRequestException extends RuntimeException {
+  public class BadRequestException extends RuntimeException {
 
     public BadRequestException(String msg) {
       super(msg);
@@ -96,11 +96,11 @@ public class UrlShortenerController {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   @ExceptionHandler(BadRequestException.class)
-  ApiResponse handleBadRequest(BadRequestException ex) {
+  public ApiResponse handleBadRequest(BadRequestException ex) {
     return new ApiResponse(HttpStatus.BAD_REQUEST.value(), "error", ex.getMessage());
   }
 
-  class NotFoundException extends RuntimeException {
+  public class NotFoundException extends RuntimeException {
 
     public NotFoundException(String msg) {
       super(msg);
@@ -110,7 +110,7 @@ public class UrlShortenerController {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
   @ExceptionHandler(NotFoundException.class)
-  ApiResponse handleNotFound(BadRequestException ex) {
+  public ApiResponse handleNotFound(NotFoundException ex) {
     return new ApiResponse(HttpStatus.NOT_FOUND.value(), "error", ex.getMessage());
   }
 }
