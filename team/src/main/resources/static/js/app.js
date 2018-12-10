@@ -21,47 +21,69 @@ $(document).ready(
                     }
                 });
             });
-    });
-
-
-$(function () {
-    $("#uploadCsv").on("submit", function (e) {
-        e.preventDefault();
-        var f = $(this);
-        var formData = new FormData(document.getElementById("uploadCsv"));
-        //formData.append("dato", "valor"); Si queremos añadir mas cosas
-        //formData.append(f.attr("name"), $(this)[0].files[0]);
-        $.ajax({
-            url: "/uploadCSV",
-            type: "post",
-            dataType: "html",
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false,
-            statusCode: {
-                400: function (response) {
-                    alert('Fichero csv malformado');
-                    bootbox.alert('<span style="color:Red;">Fichero csv malformado</span>', function () { });
-                }
-            }
-        })
-            .done(function (res) {
-                //$("#mensaje").html("Respuesta: " + res);
-                $("#myModal").modal();
-                console.log("FICHERO SUBIDO");
-                console.log(res);
-                getCsvStatus(res);
+        $("#alive").submit(
+            function (event) {
+                event.preventDefault();
+                var url = "/" + this.value +"/alive";
+                alert(url + " Gola");
+                $.ajax({
+                    type: "GET",
+                    url: "/" + this.value +"/alive",
+                    success: function (msg) {
+                        $("#result").html(
+                            "<div class='alert alert-success lead'><a target='_blank'>"
+                            + msg
+                            + "</a></div>");
+                    },
+                    error: function () {
+                        $("#result").html(
+                            "<div class='alert alert-danger lead'>ERROR</div>");
+                    }
+                });
             });
-    });
-});
+
+        $("#uploadCsv").submit( function (e) {
+            e.preventDefault();
+            var f = $(this);
+            var formData = new FormData(document.getElementById("uploadCsv"));
+            //formData.append("dato", "valor"); Si queremos añadir mas cosas
+            //formData.append(f.attr("name"), $(this)[0].files[0]);
+            $.ajax({
+                url: "/uploadCSV",
+                type: "post",
+                dataType: "html",
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                statusCode: {
+                    400: function (response) {
+                        alert('Fichero csv malformado');
+                        bootbox.alert('<span style="color:Red;">Fichero csv malformado</span>', function () { });
+                    }
+                }
+            })
+                .done(function (res) {
+                    //$("#mensaje").html("Respuesta: " + res);
+                    $("#myModal").modal();
+                    console.log("FICHERO SUBIDO");
+                    console.log(res);
+                    getCsvStatus(res);
+                });
+        });
+    }
+    );
+
+function goToHome() { $("#idContenido").load("index.html #idContenido"); return true; }
+function goToCsv() { $("#idContenido").load("csv.html #idContenido"); return true; }
+function goToAlive() { $("#idContenido").load("alive.html #idContenido"); return true; }
 
 
 function getCsvStatus(url) {
     $.ajax({
         url: url
     })
-        .done(function (res) {
+        .done(function (res, textStatus, request) {
             //aria-valuenow="50";
             //style="width:50%"
             var percentage = (res.converted / res.total)*100
@@ -74,7 +96,10 @@ function getCsvStatus(url) {
                 var win = window.open(res.uriResult, '_blank');
                 win.focus();
             } else {
-                setTimeout(getCsvStatus(url), 5000);
+                var waitingTime = request.getResponseHeader('Retry-After');
+                setTimeout(function() {
+                    getCsvStatus(url);
+                }, waitingTime*1000)
             }
 
         });
@@ -128,6 +153,7 @@ function getCsvStatus(url) {
 function getJsonFromForm() {
 
 }
+
 
 /*
 (function getCsvStatus(id) {

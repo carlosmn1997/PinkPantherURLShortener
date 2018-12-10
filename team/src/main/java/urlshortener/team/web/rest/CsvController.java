@@ -40,15 +40,14 @@ public class CsvController {
               .status(HttpStatus.BAD_REQUEST)
               .body("Fichero CSV mal formado");
     } else {
-      // It creates a new job
-      // Must be async
+      // It creates a new async job
       int idInt = id++; // job id
       String id = Integer.toString(idInt);
       Job job = new Job(id, 0, uris.size(), null, null);
       jobRepository.save(job);
       jobService.processJob(job, uris); // is async
 
-      return new ResponseEntity<>("http://localhost:8080/job/" + id, HttpStatus.CREATED);
+      return new ResponseEntity<>("http://localhost:8080/job/" + id, HttpStatus.ACCEPTED);
     }
   }
 
@@ -56,11 +55,11 @@ public class CsvController {
   public ResponseEntity<Job> job(@PathVariable String id) {
     Job j = jobRepository.findByKey(id);
     if (j != null) {
-      //HttpHeaders h = new HttpHeaders();
-      //h.setLocation(j.getUriResult());
-      return new ResponseEntity<>(j, HttpStatus.OK);
+      HttpHeaders h = new HttpHeaders();
+      h.set(HttpHeaders.RETRY_AFTER, "1"); // in seconds
+      return new ResponseEntity<>(j, h, HttpStatus.OK);
     } else {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
 
@@ -74,7 +73,7 @@ public class CsvController {
       response.setContentType("text/csv");
       return new ResponseEntity<>(HttpStatus.OK);
     } else {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
 }

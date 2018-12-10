@@ -10,7 +10,6 @@ import urlshortener.team.domain.ShortURL;
 import urlshortener.team.service.ShortUrlService;
 import urlshortener.team.service.SponsorService;
 import urlshortener.team.service.UriService;
-import urlshortener.team.service.UriServiceImpl;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.QRRepository;
 import urlshortener.team.repository.ShortURLRepository;
