@@ -57,7 +57,7 @@ public class CsvControllerTests {
 
         mockMvc.perform(multipart("/uploadCSV")
                 .file(file))
-                .andExpect(status().is(201))
+                .andExpect(status().is(202))
                 .andExpect(content().string("http://localhost:8080/job/0"));
     }
 
@@ -72,6 +72,14 @@ public class CsvControllerTests {
     }
 
     @Test
+    public void thatJobDoesntExist() throws Exception {
+        when(jobRepository.findByKey(any())).thenReturn(null);
+
+        mockMvc.perform(get("/job/{id}", "someKey")).andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void thatJobIsAnsweringOk() throws Exception {
         when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobNotFinished());
 
@@ -80,6 +88,14 @@ public class CsvControllerTests {
                 .andExpect(jsonPath("$.hash", is("0")))
                 .andExpect(jsonPath("$.converted", is(3)))
                 .andExpect(jsonPath("$.total", is(10)));
+    }
+
+    @Test
+    public void thatResultDoesntExist() throws Exception {
+        when(jobRepository.findByKey(any())).thenReturn(CsvFixture.jobNotFinished());
+
+        mockMvc.perform(get("/result/{id}", "someKey")).andDo(print())
+                .andExpect(status().isNotFound());
     }
 
     @Test

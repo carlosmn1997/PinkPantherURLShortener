@@ -43,7 +43,7 @@ public class SponsorController {
             Thread.sleep(5000); // Wait for 5 secs
 
             // Notify with the sponsor to the client
-            messagingTemplate.convertAndSend("/queue/reply-" + idTimer, originalUri);
+            messagingTemplate.convertAndSend("/queue/reply-" + idTimer, new SponsorMessage(originalUri));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

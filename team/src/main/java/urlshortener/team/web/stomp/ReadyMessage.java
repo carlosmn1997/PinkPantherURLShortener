@@ -12,6 +12,8 @@ public class ReadyMessage {
     this.content = ready;
   }
 
+  public ReadyMessage(String content, String timer){ this.content = content; this.idTimer = timer; }
+
   public String getContent() {
     return content;
   }
