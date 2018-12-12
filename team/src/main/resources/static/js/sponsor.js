@@ -33,7 +33,7 @@ function connect() {
         var token = $("#token").text();
         stompClient.subscribe('/queue/reply-' + token, function (message) {
             console.log("Message " + message.body);
-            setGoButton($("#sponsor-go-button"),$("#sponsor-countdown"),message.body);
+            setGoButton($("#sponsor-go-button"),$("#sponsor-countdown"),JSON.parse(message.body).sponsor);
             disconnect();
         });
 

@@ -4,18 +4,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.repository.ShortURLRepository;
+import urlshortener.team.service.ShortUrlService;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class SponsorController {
 
     @Autowired
     protected ShortURLRepository shortURLRepository;
+    @Autowired
+    protected ShortUrlService shortUrlService;
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
 
@@ -29,11 +35,12 @@ public class SponsorController {
 
     // The client is ready to wait
     @MessageMapping("/waitingSponsor")
-    public void setTimer(@Payload ReadyMessage message) {
+    public void setTimer(@Payload ReadyMessage message, SimpMessageHeaderAccessor ha) {
         ShortURL shorted = shortURLRepository.findByKey(message.getContent());
         if (shorted != null) {
             //timer(id++, shorted.getTarget());
             timer(Integer.parseInt(message.getIdTimer()), shorted.getTarget());
+            shortUrlService.createAndSaveClick(shorted.getHash(),(String)ha.getSessionAttributes().get("ip"));
         }
     }
 
