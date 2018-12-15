@@ -48,23 +48,13 @@ public class SponsorServiceImpl implements SponsorService {
             "        });\n" +
             "    </script>\n" +
             "</div>\n" +
-            "<div id=\"sponsor-body\" style=\"position:absolute;top:50px;\">${sponsorhtml}</div>\n" +
+            "<div id=\"sponsor-body\" style=\"position:absolute;top:50px;width:100%;height:calc(100% - 55px);\">\n" +
+            "    <iframe src=\"${sponsorUri}\" style=\"width:100%;height:100%;border:none;\"></iframe>\n" +
+            "</div>\n" +
             "</body>\n" +
             "</html>";
 
     private static int id = 0;
-
-    private static String responseToString(HttpURLConnection con) throws IOException {
-        BufferedReader bfr = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
-        String line = null;
-        StringBuffer content = new StringBuffer();
-        while ((line = bfr.readLine()) != null) {
-            content.append(line);
-        }
-        bfr.close();
-        return new String(content);
-    }
 
     public String generateHtml(ShortURL l) {
         try {
@@ -77,18 +67,18 @@ public class SponsorServiceImpl implements SponsorService {
 
             if (con.getResponseCode() != 200) {
                 con.disconnect();
-                return htmlTemplate.replace("${sponsorhtml}", "default");
+                return htmlTemplate.replace("${sponsorUri}", "default")
+                        .replace("${token}", Integer.toString(id++));
             } else {
-                String sponsorHtml = responseToString(con);
                 con.disconnect();
-                return htmlTemplate.replace("${sponsorhtml}", sponsorHtml)
+                return htmlTemplate.replace("${sponsorUri}", l.getSponsor())
                         .replace("${token}", Integer.toString(id++));
             }
         } catch (MalformedURLException e) {
-            return htmlTemplate.replace("${sponsorhtml}", "default")
+            return htmlTemplate.replace("${sponsorUri}", "default")
                     .replace("${token}", Integer.toString(id++));
         } catch (IOException e) {
-            return htmlTemplate.replace("${sponsorhtml}", "default")
+            return htmlTemplate.replace("${sponsorUri}", "default")
                     .replace("${token}", Integer.toString(id++));
         }
     }
