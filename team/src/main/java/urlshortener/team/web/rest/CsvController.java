@@ -57,6 +57,7 @@ public class CsvController {
     if (j != null) {
       HttpHeaders h = new HttpHeaders();
       h.set(HttpHeaders.RETRY_AFTER, "1"); // in seconds
+      j.setResult(null); // In order to not send all the result, you must to call the result method
       return new ResponseEntity<>(j, h, HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);

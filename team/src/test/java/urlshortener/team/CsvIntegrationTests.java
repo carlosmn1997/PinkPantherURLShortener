@@ -67,7 +67,7 @@ public class CsvIntegrationTests {
     assertThat(entity.getStatusCode(), is(HttpStatus.OK));
     ReadContext rc = JsonPath.parse(entity.getBody());
 
-    while(rc.read("$.result")==null){
+    while(rc.read("$.uriResult")==null){
         entity = restTemplate.getForEntity("/job/0", String.class);
         assertThat(entity.getStatusCode(), is(HttpStatus.OK));;
 

@@ -24,16 +24,18 @@ tags:
         1. Si no se había creado la URI con la funcionalidad `periodicity` el método `GET /{id}/alive` devuelve 404.
   - name: "F3"
     description: |
-      Servicio que permite subir un CSV con todas las URI que se desean acortar y que devuelve un CSV con que contiene para cada URI su URI acortada.
+      Servicio que permite subir un CSV con todas las URI que se desean acortar y que devuelve un CSV con que contiene para cada URI su URI acortada. Si alguna URI es incorrecta se señalará en el mismo CSV.
       - Formato de entrada CSV:
         | URIOriginal |
         | ------- |
         | http://midomino.com |
+        | noSoyUnaURI |
         | http://mirecurso.com |
       - Formato de salida CSV:
         | URIOriginal | URIAcortada |
         | ------- | -------- |
-        | http://midomino.com | http://recortada/123 |
+        | http://midomino.com | http://recortada/123 |+
+        | noSoyUnaURI | Uri no disponible |
         | http://mirecurso.com | http://recortada/321 |
 
       - **Secuencia de ejecución**:
@@ -214,7 +216,7 @@ paths:
       tags:
         - "F3"
       summary: |
-        Devuelve el estado del procesado de las URIs del fichero subido
+        Devuelve el estado del procesado de las URIs del fichero subido. La cabecera contiene un campo Retry-After para indicar cada cuantos segundos preguntar por el estado de la petición.
       operationId: "jobState"
       parameters:
         - in: path
@@ -228,28 +230,23 @@ paths:
           schema:
             type: "object"
             properties:
-              state:
-                type: "object"
-                properties:
-                  URIsProcessed:
-                    type: integer
-                    example: 25
-                  TotalURIs:
-                    type: integer
-                    example: 100
-        201:
-          description: "Fichero procesado, devuelve el identificador del resultado con el que se debe preguntar a result/{id}"
-          schema:
-            type: string
-            example: 4321
-        502:
-          description: "Uri no alcanzable"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        400:
-          description: "URI inválida"
-          schema:
-            $ref: "#/definitions/ApiResponse"
+              hash:
+                type: string
+                example: "0"
+              converted:
+                type: integer
+                example: 25
+              total:
+                type: integer
+                example: 100
+              uriResult:
+                type: string
+                example: http://localhost:8080/result/0
+              result:
+                type: string
+                example: null
+        404:
+          description: "No existe el trabajo"
 
   /result/{id}:
     get:
