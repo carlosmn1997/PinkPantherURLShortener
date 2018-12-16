@@ -65,7 +65,7 @@ public class SponsorServiceImpl implements SponsorService {
             con.setReadTimeout(6000);
             con.setConnectTimeout(6000);
 
-            if (con.getResponseCode() != 200) {
+            if (con.getResponseCode() != 200 && con.getResponseCode() != 301) {
                 con.disconnect();
                 return htmlTemplate.replace("${sponsorUri}", "default")
                         .replace("${token}", Integer.toString(id++));

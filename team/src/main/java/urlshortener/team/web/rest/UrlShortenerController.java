@@ -55,7 +55,8 @@ public class UrlShortenerController {
                                      @RequestParam(value = "qr") boolean qr,
                                      @RequestParam(value = "sponsor", required = false) String sponsor,
                                      HttpServletRequest request) {
-    if (!uriService.checkSyntax(uri)) {
+    if (!uriService.checkSyntax(uri) ||
+            sponsor!=null && !uriService.checkSyntax(sponsor)) {
       throw new UrlShortenerController.BadRequestException("Bad syntax");
     }
     ShortURL su = shortUrlService.createAndSaveShortUrl(uri, sponsor,

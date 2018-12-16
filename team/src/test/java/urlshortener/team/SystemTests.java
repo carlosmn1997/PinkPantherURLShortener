@@ -108,12 +108,12 @@ public class SystemTests {
 
   @Test
   public void testCreateLinkWithSponsor() throws Exception {
-    ResponseEntity<String> entity = postLink("http://example.com/", false, false, "www.misponsor.com");
+    ResponseEntity<String> entity = postLink("http://example.com/", false, false, "http://www.misponsor.com");
 
     assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
     assertThat(entity.getHeaders().getContentType(), is(new MediaType("application", "json", Charset.forName("UTF-8"))));
     ReadContext rc = JsonPath.parse(entity.getBody());
-    assertThat(rc.read("$.sponsor"), is("www.misponsor.com"));
+    assertThat(rc.read("$.sponsor"), is("http://www.misponsor.com"));
   }
 
   @Test
