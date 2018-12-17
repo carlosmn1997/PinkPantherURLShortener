@@ -1,19 +1,16 @@
 function goToHome() {
-    $("#idContenido").load("index.html #idContenido");
-    $("#shortener").on('submit');
-    $.getScript('js/index.js');
-    return false;
+    $("#idContenido").load("index.html #idContenido", function(){
+        $(document).ready($.getScript('js/index.js'));
+    });
 }
 function goToCsv() {
-    $("#idContenido").load("csv.html #idContenido");
-    $("#uploadCsv").on('submit');
-    $.getScript('js/csv.js');
-    return false;
+    $("#idContenido").load("csv.html #idContenido", function(){
+        $(document).ready($.getScript('js/csv.js'));
+    });
 }
 
 function goToAlive() {
-    $("#idContenido").load("alive.html #idContenido");
-    $("#alive").on('submit');
-    $.getScript('js/alive.js');
-    return false;
+    $("#idContenido").load("alive.html #idContenido", function(){
+        $(document).ready($.getScript('js/alive.js'));
+    });
 }

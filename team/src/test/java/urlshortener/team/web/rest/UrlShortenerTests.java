@@ -1,21 +1,21 @@
 package urlshortener.team.web.rest;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.service.UriService;
-import urlshortener.team.service.UriServiceImpl;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.ShortURLRepository;
 import urlshortener.team.web.rest.fixture.ShortURLFixture;
-
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,27 +25,22 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@DirtiesContext
+@AutoConfigureMockMvc
 public class UrlShortenerTests {
-
-  private MockMvc mockMvc;
-
-  @Mock
+  @MockBean
   private ClickRepository clickRepository;
 
-  @Mock
+  @MockBean
   private ShortURLRepository shortURLRepository;
 
-  @Mock
+  @MockBean
   private UriService uriService;
 
-  @InjectMocks
-  private UrlShortenerController urlShortener;
-
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-    this.mockMvc = MockMvcBuilders.standaloneSetup(urlShortener).build();
-  }
+  @Autowired
+  private MockMvc mockMvc;
 
   @Test
   public void thatRedirectToReturnsTemporaryRedirectIfKeyExists()

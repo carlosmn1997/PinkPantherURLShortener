@@ -15,9 +15,9 @@ $(document).ready(
                             + msg.uri
                             + "</a></div>");
                     },
-                    error: function () {
+                    error: function (msg) {
                         $("#result").html(
-                            "<div class='alert alert-danger lead'>ERROR</div>");
+                            "<div class='alert alert-danger lead'>" + JSON.parse(msg.responseText).message + "</div>");
                     }
                 });
             });

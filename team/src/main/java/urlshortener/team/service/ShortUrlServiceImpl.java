@@ -26,6 +26,9 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     @Autowired
     ClickRepository clickRepository;
 
+    @Autowired
+    UriService uriService;
+
     private static final Logger LOG = LoggerFactory
             .getLogger(UrlShortenerController.class);
 
@@ -42,7 +45,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         Integer mode = HttpStatus.TEMPORARY_REDIRECT.value();
         boolean safe = true;
         String country = null;
-        boolean aliveOnLastCheck = false;
+        boolean aliveOnLastCheck = periodicity ?  uriService.checkAlive(target) : false;
         return shortURLRepository.save(new ShortURL(hash, target, uri, sponsor, created,
                 owner, mode, safe, ip, country, periodicity, aliveOnLastCheck, qr));
     }
