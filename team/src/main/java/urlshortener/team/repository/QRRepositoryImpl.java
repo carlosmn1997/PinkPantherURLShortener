@@ -6,6 +6,7 @@ import org.springframework.web.client.RestTemplate;
 import urlshortener.team.domain.ShortURL;
 
 import java.sql.Blob;
+import java.util.Base64;
 
 public class QRRepositoryImpl implements QRRepository {
 
@@ -41,9 +42,13 @@ public class QRRepositoryImpl implements QRRepository {
       jdbc.update("UPDATE SHORTURL SET qr = TRUE WHERE HASH = ?", hash);
 
       RestTemplate restTemplate = new RestTemplate();
-      byte[] pngData = restTemplate.getForObject(
-              "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + uri, byte[].class);
-      Blob b = new javax.sql.rowset.serial.SerialBlob(pngData);
+
+      byte[] toBase64 = Base64.getEncoder().encode(
+              restTemplate.getForObject(
+                      "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" +
+                              uri, byte[].class));
+
+      Blob b = new javax.sql.rowset.serial.SerialBlob(toBase64);
 
       jdbc.update("UPDATE SHORTURL SET qrImage = ? WHERE HASH = ?", b, hash);
       return true;

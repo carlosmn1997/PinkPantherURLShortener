@@ -14,3 +14,9 @@ function goToAlive() {
         $(document).ready($.getScript('js/alive.js'));
     });
 }
+
+function goToQr() {
+    $("#idContenido").load("qr.html #idContenido", function(){
+        $(document).ready($.getScript('js/qr.js'));
+    });
+}

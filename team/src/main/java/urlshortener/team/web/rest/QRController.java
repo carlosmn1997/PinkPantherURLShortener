@@ -7,45 +7,42 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import urlshortener.team.domain.ApiResponse;
 import urlshortener.team.domain.ShortURL;
 import urlshortener.team.repository.ShortURLRepository;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @RestController
 public class QRController {
+
   private static final Logger LOG = LoggerFactory
           .getLogger(QRController.class);
+
   @Autowired
   protected ShortURLRepository shortURLRepository;
 
-  @RequestMapping(value = "/{id:(?!link).*}/qr", method = RequestMethod.GET)
-  public ResponseEntity qr(@PathVariable String id,
-                           HttpServletResponse response) throws IOException {
-    ShortURL s = shortURLRepository.findByKey(id);
-    if (s != null) {
-      if (s.getQR()) {
-        if (s.getQRimage() == null) {
-          HttpHeaders h = new HttpHeaders();
-          h.set(HttpHeaders.RETRY_AFTER, "5");
-          return new ResponseEntity<>(h, HttpStatus.NOT_FOUND);
-        } else {
-          HttpHeaders h = new HttpHeaders();
-          h.setContentType(MediaType.IMAGE_PNG);
-          return new ResponseEntity<>(s.getQRimage(), h, HttpStatus.OK);
-        }
-      } else {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+  @GetMapping("/{id}/qr")
+  public ResponseEntity<?> qr(@PathVariable String id,HttpServletResponse response) {
+      ShortURL s = shortURLRepository.findByKey(id);
+      if (s == null) {
+          return new ResponseEntity("ERROR: " + id + " does not reference any url",
+                  HttpStatus.BAD_REQUEST);
       }
-    } else {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
+      if (!s.getQR()) {
+          return new ResponseEntity<>("ERROR: QR wasn't asked when you shorted your url",
+                  HttpStatus.NOT_FOUND);
+          //throw new NotFoundException(id + "doesn't have qr associated because it wasn't \n"+
+            //      "asked when it was shorted");
+      }
+      if (s.getQRimage() == null) {
+          HttpHeaders h = new HttpHeaders();
+          h.set(HttpHeaders.RETRY_AFTER,"5 secs");
+          return new ResponseEntity<>("ERROR: Your QR is being created",
+                  h,HttpStatus.NOT_FOUND);
+          //throw new NotFoundTimeoutException(id + " qr it's being created in this moment");
+      }
+      return new ResponseEntity<>(s.getQRimage(), HttpStatus.OK);
   }
-
-
 }
