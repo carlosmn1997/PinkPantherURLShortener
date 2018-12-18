@@ -60,7 +60,7 @@ public class CsvIntegrationTests {
     ResponseEntity<String> entity = uploadCsv(testFile);
 
     assertThat(entity.getStatusCode(), is(HttpStatus.ACCEPTED));
-    assertThat(entity.getBody(), is("http://localhost:8080/job/0"));
+    assertThat(entity.getHeaders().getLocation().toString(), is("http://localhost:"+port+"/job/0"));
 
     // Get the job
     entity = restTemplate.getForEntity("/job/0", String.class);

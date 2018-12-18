@@ -3,12 +3,16 @@ package urlshortener.team.web.rest;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import urlshortener.team.repository.JobRepository;
@@ -24,6 +28,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class CsvControllerTests {
 
     private MockMvc mockMvc;
@@ -56,7 +63,7 @@ public class CsvControllerTests {
         mockMvc.perform(multipart("/uploadCSV")
                 .file(file))
                 .andExpect(status().is(202))
-                .andExpect(redirectedUrlPattern("http://*/job/0"));
+                .andExpect(redirectedUrlPattern("http://*/job/*"));
     }
 
 
