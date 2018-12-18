@@ -18,15 +18,14 @@ $(function () {
                     alert('Fichero csv malformado');
                     bootbox.alert('<span style="color:Red;">Fichero csv malformado</span>', function () { });
                 }
+            },
+            success: function(data, status, xhr) {
+                console.log(xhr.getResponseHeader('Location'));
+                var location = xhr.getResponseHeader('Location');
+                $("#myModal").modal();
+                getCsvStatus(location);
             }
         })
-            .done(function (res) {
-                //$("#mensaje").html("Respuesta: " + res);
-                $("#myModal").modal();
-                console.log("FICHERO SUBIDO");
-                console.log(res);
-                getCsvStatus(res);
-            });
     });
 });
 
@@ -41,8 +40,6 @@ function getCsvStatus(url) {
             //document.getElementById("progressBar").aria-valuenow;
             document.getElementById("progressBar").style = "width:"+percentage+'%';
             document.getElementById("progressBar").innerHTML = res.converted + " de " + res.total;
-            console.log(res);
-            console.log("ACABADO");
             if(res.uriResult != null){ // Conversion finished
                 var win = window.open(res.uriResult, '_blank');
                 win.focus();

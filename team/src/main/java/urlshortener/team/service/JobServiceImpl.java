@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +28,9 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private ShortURLRepository shortURLRepository;
+
+    @Autowired
+    private ShortUrlService shortUrilService;
 
     @Autowired
     private UriService uriService;
@@ -55,12 +59,13 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<String> shortUris(List<String> urisToShort, Job job) {
+    public List<String> shortUris(List<String> urisToShort, Job job, String ip, URI uriBase) {
         List<String> urisShorted = new ArrayList<>();
         for (String uri : urisToShort) {
             // Save URI
-            ShortURL su = new ShortURL(uri, null, null, false, false);
-            su = shortURLRepository.save(su);
+            //ShortURL su = new ShortURL(uri, null, null, false, false);
+            ShortURL su = shortUrilService.createAndSaveShortUrl(uri, uriBase, null, ip, false, false);
+            //su = shortURLRepository.save(su);
             if (su != null) {
                 urisShorted.add(su.getUri().toString());
             } else {
@@ -127,8 +132,8 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Async
-    public void processJob(Job job, List<String> urisToShort) {
-        List<String> urisShorted = shortUris(urisToShort, job);
+    public void  processJob(Job job, List<String> urisToShort, String ip, URI uriBase) {
+        List<String> urisShorted = shortUris(urisToShort, job, ip, uriBase);
 
         // when it has finished, create CSV
         List<CsvFormat> csvList = createCsv(urisToShort, urisShorted);

@@ -13,6 +13,7 @@ import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.ShortURLRepository;
 import urlshortener.team.web.rest.UrlShortenerController;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.util.UUID;
@@ -33,13 +34,23 @@ public class ShortUrlServiceImpl implements ShortUrlService {
             .getLogger(UrlShortenerController.class);
 
     @Override
-    public ShortURL createAndSaveShortUrl(String target, String sponsor,
+    public ShortURL createAndSaveShortUrl(String target, URI uriBase, String sponsor,
                                           String ip, Boolean periodicity, Boolean qr) {
         String hash = Hashing.murmur3_32().hashString(target + sponsor + ip
                 + periodicity.toString() + qr.toString(), StandardCharsets.UTF_8)
                 .toString();
-        URI uri =linkTo(methodOn(UrlShortenerController.class)
-                .redirectTo(hash, null)).toUri();
+        URI uri = null;
+        if(uriBase == null){
+            uri =linkTo(methodOn(UrlShortenerController.class)
+                    .redirectTo(hash, null)).toUri();
+        }
+        else {
+            try{
+                uri = new URI( "http://" + uriBase.getHost() +":"+uriBase.getPort() + "/"+hash );
+            } catch(URISyntaxException e){
+                e.printStackTrace();
+            }
+        }
         Date created = new Date(System.currentTimeMillis());
         String owner = UUID.randomUUID().toString();
         Integer mode = HttpStatus.TEMPORARY_REDIRECT.value();

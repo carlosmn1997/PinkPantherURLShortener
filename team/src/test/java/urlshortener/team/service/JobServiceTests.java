@@ -23,6 +23,7 @@ import urlshortener.team.repository.fixture.ShortURLFixture;
 import urlshortener.team.service.fixture.CsvRepositoryFixture;
 import urlshortener.team.repository.fixture.JobRepositoryFixture;
 
+import java.net.URI;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -46,42 +47,43 @@ public class JobServiceTests {
 
     }
 
-  @Test
-  public void thatParseTheFileProperly() {
-    MultipartFile correctCsv = CsvRepositoryFixture.getCorrectCsv();
-    List<String> result = jobService.parserCsv(correctCsv);
-    assertEquals(result.size(), 3);
-    assertEquals(result.get(2), "http://www.uri3.com");
-  }
-
-  @Test
-  public void thatParseAFileIncorrectReturnNull() {
-      MultipartFile incorrectCsv = CsvRepositoryFixture.getIncorrectCsv();
-      List<String> result = jobService.parserCsv(incorrectCsv);
-      assertNull(result);
-  }
-
-  @Test
-  public void thatGeneratesTheColumnsOfACsv() {
-    List<String> urisToShort = CsvRepositoryFixture.urisToShort();
-    List<String> urisShorted = CsvRepositoryFixture.urisShorted();
-    List<CsvFormat> result = jobService.createCsv(urisToShort, urisShorted);
-    assertEquals(result.get(2).getURIOriginal(), CsvRepositoryFixture.urisToShort().get(2));
-    assertEquals(result.get(2).getURIAcortada(), CsvRepositoryFixture.urisShorted().get(2));
-  }
-
-  @Test
-  public void thatProcessTheJobProperly() {
-    Job j = jobRepository.save(JobRepositoryFixture.jobWithUris());
-    jobService.processJob(j, CsvRepositoryFixture.urisToShort());
-    try {
-      Thread.sleep(5000);
-      j = jobRepository.findByKey(JobRepositoryFixture.jobWithUris().getHash());
-      assertNotNull(j.getResult());
-      assertEquals(j.getResult().size(), 3);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
+    @Test
+    public void thatParseTheFileProperly() {
+        MultipartFile correctCsv = CsvRepositoryFixture.getCorrectCsv();
+        List<String> result = jobService.parserCsv(correctCsv);
+        assertEquals(result.size(), 3);
+        assertEquals(result.get(2), "http://www.uri3.com");
     }
-  }
+
+    @Test
+    public void thatParseAFileIncorrectReturnNull() {
+        MultipartFile incorrectCsv = CsvRepositoryFixture.getIncorrectCsv();
+        List<String> result = jobService.parserCsv(incorrectCsv);
+        assertNull(result);
+    }
+
+    @Test
+    public void thatGeneratesTheColumnsOfACsv() {
+        List<String> urisToShort = CsvRepositoryFixture.urisToShort();
+        List<String> urisShorted = CsvRepositoryFixture.urisShorted();
+        List<CsvFormat> result = jobService.createCsv(urisToShort, urisShorted);
+        assertEquals(result.get(2).getURIOriginal(), CsvRepositoryFixture.urisToShort().get(2));
+        assertEquals(result.get(2).getURIAcortada(), CsvRepositoryFixture.urisShorted().get(2));
+    }
+
+    @Test
+    public void thatProcessTheJobProperly() {
+        URI uriExample = CsvRepositoryFixture.getUriExample();
+        Job j = jobRepository.save(JobRepositoryFixture.jobWithUris());
+        jobService.processJob(j, CsvRepositoryFixture.urisToShort(), null, uriExample);
+        try {
+            Thread.sleep(5000);
+            j = jobRepository.findByKey(JobRepositoryFixture.jobWithUris().getHash());
+            assertNotNull(j.getResult());
+            assertEquals(j.getResult().size(), 3);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

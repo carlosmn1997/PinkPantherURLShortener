@@ -198,14 +198,12 @@ paths:
         description: "fichero csv"
       responses:
         202:
-          description: "Fichero subido, devuelve el identificador del trabajo. Se tendrá que preguntar el estado del trabajo en /job/{id}"
-          schema:
-            type: string
-            example: 1234
+          description: "Fichero subido, devuelve la URI del trabajo creado en Location en el Header"
         400:
           description: "Fichero CSV malformado"
           schema:
-            $ref: "#/definitions/ApiResponse"
+            type: "string"
+            example: "Fechero CSV malformado"
 
   /job/{id}:
     get:

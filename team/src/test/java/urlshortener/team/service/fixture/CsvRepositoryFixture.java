@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,5 +58,9 @@ public class CsvRepositoryFixture {
     uris.add("http://www.base.com/2");
     uris.add("http://www.base.com/3");
     return uris;
+  }
+
+  public static URI getUriExample(){
+    return URI.create("https://localhost:8080");
   }
 }

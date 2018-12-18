@@ -59,7 +59,7 @@ public class UrlShortenerController {
             sponsor!=null && !sponsor.isEmpty() && !uriService.checkSyntax(sponsor)) {
       throw new BadRequestException("Bad syntax");
     }
-    ShortURL su = shortUrlService.createAndSaveShortUrl(uri, sponsor,
+    ShortURL su = shortUrlService.createAndSaveShortUrl(uri, null, sponsor,
             request.getRemoteAddr(), periodicity, qr);
     if (su == null) {
       throw new BadRequestException("Cannot save the url");

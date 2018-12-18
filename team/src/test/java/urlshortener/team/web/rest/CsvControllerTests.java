@@ -22,9 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class CsvControllerTests {
 
@@ -53,13 +51,14 @@ public class CsvControllerTests {
         when(jobRepository.save(any())).thenAnswer((InvocationOnMock invocation) -> invocation.getArguments()[0]);
 
         // For void functions
-        doNothing().when(jobService).processJob(any(), any());
+        doNothing().when(jobService).processJob(any(), any(), any(), any());
 
         mockMvc.perform(multipart("/uploadCSV")
                 .file(file))
-                .andExpect(status().is(202));
-                //.andExpect(content().string("http://localhost:8080/job/0"));
+                .andExpect(status().is(202))
+                .andExpect(redirectedUrlPattern("http://*/job/0"));
     }
+
 
     @Test
     public void thatFileIsWrongParsingIt() throws Exception {

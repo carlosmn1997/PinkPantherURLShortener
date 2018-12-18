@@ -31,7 +31,7 @@ public class ShortUrlServiceTest {
     @Test
     public void thatServiceSavesShortUrlWithSponsorAndTruePeriodicityAndTrueQr() {
         configureTransparentSave();
-        ShortURL s = shortUrlService.createAndSaveShortUrl(TARGET, SPONSOR, IP, true, true);
+        ShortURL s = shortUrlService.createAndSaveShortUrl(TARGET, null, SPONSOR, IP, true, true);
         assertEquals(TARGET, s.getTarget());
         assertEquals(SPONSOR, s.getSponsor());
         assertEquals(true, s.isAliveOnLastCheck());
@@ -41,7 +41,7 @@ public class ShortUrlServiceTest {
     @Test
     public void thatServiceSavesShortUrlWithoutSponsorAndFalsePeriodicityAndFalseQr() {
         configureTransparentSave();
-        ShortURL s = shortUrlService.createAndSaveShortUrl(TARGET, null, IP, false, false);
+        ShortURL s = shortUrlService.createAndSaveShortUrl(TARGET, null, null, IP, false, false);
         assertEquals(TARGET, s.getTarget());
         assertEquals(null, s.getSponsor());
         assertEquals(false, s.isAliveOnLastCheck());
