@@ -57,6 +57,7 @@ public class SponsorServiceImpl implements SponsorService {
     private static int id = 0;
 
     public String generateHtml(ShortURL l) {
+        String defaultSponsorUri = "https://www.wikipedia.org/";
         try {
             // https://www.baeldung.com/java-http-request
             URL urlSponsor = new URL(l.getSponsor());
@@ -67,18 +68,15 @@ public class SponsorServiceImpl implements SponsorService {
 
             if (con.getResponseCode() != 200 && con.getResponseCode() != 301) {
                 con.disconnect();
-                return htmlTemplate.replace("${sponsorUri}", "default")
+                return htmlTemplate.replace("${sponsorUri}", defaultSponsorUri)
                         .replace("${token}", Integer.toString(id++));
             } else {
                 con.disconnect();
                 return htmlTemplate.replace("${sponsorUri}", l.getSponsor())
                         .replace("${token}", Integer.toString(id++));
             }
-        } catch (MalformedURLException e) {
-            return htmlTemplate.replace("${sponsorUri}", "default")
-                    .replace("${token}", Integer.toString(id++));
         } catch (IOException e) {
-            return htmlTemplate.replace("${sponsorUri}", "default")
+            return htmlTemplate.replace("${sponsorUri}", defaultSponsorUri)
                     .replace("${token}", Integer.toString(id++));
         }
     }
