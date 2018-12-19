@@ -53,7 +53,7 @@ tags:
     - **Secuencia de ejecución**:
         1. Ejecutar /{id}
         2. En el caso en el que haya sponsor, se redirige a un HTML con JavaScript.
-        3. El JavaScript invoca a /resolve/{id} y redirige a la URI asociada a la acortada
+        3. El JavaScript interacciona con webSockets con el servidor y este devuelve tras 5 segundos la URI asociada a la acortada
 - name: "F6"
   description: "Servicio que devuelve la URI asociada a la acortada"
 - name: "F7"
@@ -106,13 +106,13 @@ paths:
           description: "URI inválida"
           schema:
             $ref: "#/definitions/ApiResponse"
-
+  /{id}:
     get:
       tags:
       - "F6"
       - "F5"
       summary: |
-        Servicio que redirige a la URI asociada a la URI acortada. Si la URI tiene sponsor, entonces devuelve la URI del sponsor un HTML con JavaScript que conecta con /resolve/{id} para que al cabo de cierto tiempo rediriga a la URI asociada.
+        Servicio que redirige a la URI asociada a la URI acortada. Si la URI tiene sponsor, entonces devuelve la URI del sponsor un HTML con JavaScript que interacciona con el servidor mediante webSockets para obtener tras 5 segundos la URI asociada.
       operationId: "returnURI"
       parameters:
       - in: path
@@ -120,43 +120,18 @@ paths:
         description: "id URI acortada"
         type: "string"
         required: true
-      responses:
-        307:
-          description: "Redireccionamiento correcto"
-        404:
-          description: "URI no alcanzable"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-
-  /resolve/{id}:
-    get:
-      tags:
-      - "F5"
-      summary: |
-        Redirige a la URI original una vez haya pasado el tiempo indicado.
-      operationId: "resolveURI"
-      parameters:
-      - in: path
-        name: "id"
-        description: "id trabajo de resolución"
-        type: "string"
-        required: true
+      produces:
+        - application/json
+        - text/html
       responses:
         200:
-          description: "tiempo restante en milisegundos para desbloquear el redireccionamiento"
-          schema:
-            type: "object"
-            properties:
-              remainingTime:
-                type: "string"
-                example: 3250
+          description: "Intersicial de publicidad"
         307:
           description: "Redireccionamiento correcto"
         404:
           description: "URI no alcanzable"
           schema:
             $ref: "#/definitions/ApiResponse"
-
 
   /{id}/qr:
     get:
