@@ -55,7 +55,6 @@ public class CsvIntegrationTests {
     }
 
     @Test
-    @Ignore
     public void testCsvCorrect() throws Exception {
         Resource testFile = getTestFile();
         ResponseEntity<String> entity = uploadCsv(testFile);
