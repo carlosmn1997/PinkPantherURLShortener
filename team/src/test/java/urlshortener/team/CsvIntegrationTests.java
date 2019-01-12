@@ -59,16 +59,19 @@ public class CsvIntegrationTests {
         Resource testFile = getTestFile();
         ResponseEntity<String> entity = uploadCsv(testFile);
 
+        String location = entity.getHeaders().getLocation().toString();
+        char idJob = location.charAt(location.length()-1); // Assuming it is only one char
+
         assertThat(entity.getStatusCode(), is(HttpStatus.ACCEPTED));
-        assertThat(entity.getHeaders().getLocation().toString(), is("http://localhost:" + port + "/job/0"));
+        assertThat(location, is("http://localhost:" + port + "/job/"+idJob));
 
         // Get the job
-        entity = restTemplate.getForEntity("/job/0", String.class);
+        entity = restTemplate.getForEntity("/job/"+idJob, String.class);
         assertThat(entity.getStatusCode(), is(HttpStatus.OK));
         ReadContext rc = JsonPath.parse(entity.getBody());
 
         while (rc.read("$.uriResult") == null) {
-            entity = restTemplate.getForEntity("/job/0", String.class);
+            entity = restTemplate.getForEntity("/job/"+idJob, String.class);
             assertThat(entity.getStatusCode(), is(HttpStatus.OK));
             ;
 
@@ -79,7 +82,7 @@ public class CsvIntegrationTests {
         }
 
         // Get the result
-        entity = restTemplate.getForEntity("/result/0", String.class);
+        entity = restTemplate.getForEntity("/result/"+idJob, String.class);
         assertThat(entity.getStatusCode(), is(HttpStatus.OK));
         assertThat(entity.getHeaders().getContentType(), is(new MediaType("text", "csv", Charset.forName("ISO-8859-1"))));
     }
