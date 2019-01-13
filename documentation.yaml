@@ -304,6 +304,10 @@ paths:
           description: "La URI no se comprueba periódicamente"
           schema:
             $ref: "#/definitions/ApiResponse"
+        404:
+          description: "La URI acortada no existe"
+          schema:
+            $ref: "#/definitions/ApiResponse"
 
 definitions:
   ApiResponse:
