@@ -54,19 +54,28 @@ public class StatsRepositoryImpl implements StatsRepository {
   }
 
   public Optional<UriStats> getUriStats(String hash) {
+    ClickRepository clickRepository = new ClickRepositoryImpl(jdbc);
+    ShortURLRepository urlRepository = new ShortURLRepositoryImpl(jdbc);
+    Long clicks;
+    Date creationDate;
     try {
-      ClickRepository clickRepository = new ClickRepositoryImpl(jdbc);
-      ShortURLRepository urlRepository = new ShortURLRepositoryImpl(jdbc);
-      Long clicks = clickRepository.clicksByHash(hash);
-      Date creationDate = urlRepository.findByKey(hash).getCreated();
+      clicks = clickRepository.clicksByHash(hash);
+      creationDate = urlRepository.findByKey(hash).getCreated();
+    } catch (Exception e) {
+      // Exception selecting creation date -> hash not found
+      log.debug("When select ", e);
+      return Optional.empty();
+    }
+    try {
       Timestamp lastRedirection = new Timestamp(0);
       lastRedirection = new Timestamp(jdbc
               .queryForObject("select CREATED from click order by id desc limit 1",
                       Timestamp.class).getTime());
       return Optional.of(new UriStats(creationDate, clicks, lastRedirection));
     } catch (Exception e) {
+      // Exception selecting last redirection -> hash found but no clicks found
       log.debug("When select ", e);
-      return Optional.empty();
+      return Optional.of(new UriStats(creationDate, clicks, new Timestamp(0L)));
     }
 
   }
