@@ -1,0 +1,21 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://qr/web/ws/schema" elementFormDefault="qualified">
+
+    <xs:element name="getQRRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="uri" type="xs:string"/>
+                <xs:element name="hash" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getQRResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="done" type="xs:boolean"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
