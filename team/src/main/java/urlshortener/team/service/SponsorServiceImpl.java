@@ -55,9 +55,11 @@ public class SponsorServiceImpl implements SponsorService {
             "</html>";
 
     private static int id = 0;
+    private String defaultSponsorUri = "https://www.wikipedia.org/";
+
+    public String getDefaultSponsorUri(){ return defaultSponsorUri; }
 
     public String generateHtml(ShortURL l) {
-        String defaultSponsorUri = "https://www.wikipedia.org/";
         try {
             // https://www.baeldung.com/java-http-request
             URL urlSponsor = new URL(l.getSponsor());
