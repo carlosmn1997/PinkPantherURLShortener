@@ -1,0 +1,33 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://spring.io/guides/gs-producing-web-service"
+           targetNamespace="http://spring.io/guides/gs-producing-web-service" elementFormDefault="qualified">
+
+    <xs:element name="getQRRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="shorted" type="tns:uri"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getQrResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="qrImage" type="tns:qr"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="uri">
+        <xs:sequence>
+            <xs:element name="uri" type="xs:string"/>
+            <xs:element name="hash" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="qr">
+        <xs:sequence>
+            <xs:element name="image" type="xs:base64Binary"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

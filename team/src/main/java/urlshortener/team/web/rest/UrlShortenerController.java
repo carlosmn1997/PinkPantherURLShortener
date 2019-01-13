@@ -13,6 +13,8 @@ import urlshortener.team.service.UriService;
 import urlshortener.team.repository.ClickRepository;
 import urlshortener.team.repository.QRRepository;
 import urlshortener.team.repository.ShortURLRepository;
+import urlshortener.team.web.SOAP.QRClient;
+
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
@@ -65,7 +67,9 @@ public class UrlShortenerController {
       throw new BadRequestException("Cannot save the url");
     }
     if (qr) {
-      qrRepository.createQR(su.getHash(), su.getUri().toString());
+      QRClient qrSOAP=new QRClient();
+      qrSOAP.getQR(su.getHash(),su.getUri().toString());
+      //qrRepository.createQR(su.getHash(), su.getUri().toString());
     }
     HttpHeaders h = new HttpHeaders();
     h.setLocation(su.getUri());
