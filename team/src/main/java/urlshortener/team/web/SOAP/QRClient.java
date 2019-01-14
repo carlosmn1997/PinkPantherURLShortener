@@ -5,10 +5,13 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.ClassUtils;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
+
+import java.util.concurrent.TimeUnit;
 
 
 public class QRClient extends WebServiceGatewaySupport {
@@ -48,6 +51,12 @@ public class QRClient extends WebServiceGatewaySupport {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Segundo");
         return qr;
     }
 

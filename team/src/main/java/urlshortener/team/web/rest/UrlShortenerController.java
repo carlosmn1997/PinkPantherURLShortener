@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.bind.annotation.*;
 import urlshortener.team.domain.ApiResponse;
 import urlshortener.team.domain.ShortURL;
@@ -69,6 +70,7 @@ public class UrlShortenerController {
     if (qr) {
       QRClient qrSOAP=new QRClient();
       qrSOAP.getQR(su.getHash(),su.getUri().toString());
+      System.out.println("Primero");
       //qrRepository.createQR(su.getHash(), su.getUri().toString());
     }
     HttpHeaders h = new HttpHeaders();

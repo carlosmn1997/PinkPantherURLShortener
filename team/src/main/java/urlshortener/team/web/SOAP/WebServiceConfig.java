@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.HttpServletBean;
 import org.springframework.ws.config.annotation.EnableWs;
 import org.springframework.ws.config.annotation.WsConfigurerAdapter;
