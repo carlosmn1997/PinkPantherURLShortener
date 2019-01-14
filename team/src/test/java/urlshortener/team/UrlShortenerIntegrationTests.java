@@ -30,7 +30,7 @@ public class UrlShortenerIntegrationTests {
 
     @Test
     public void testRedirection() throws Exception {
-        ResponseEntity<String> entity = postLink("http://example.com/", true, true, null);
+        ResponseEntity<String> entity = postLink("http://example.com/", true, false, null);
 
         ReadContext rc = JsonPath.parse(entity.getBody());
         entity = restTemplate.getForEntity("/" + rc.read("$.hash"), String.class);
@@ -46,7 +46,7 @@ public class UrlShortenerIntegrationTests {
 
     @Test
     public void testCreateLinkFailsIfNoPeriodicity() throws Exception {
-        ResponseEntity<String> entity = postLink("http://example.com/", null, true, null);
+        ResponseEntity<String> entity = postLink("http://example.com/", null, false, null);
         assertThat(entity.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 
@@ -114,7 +114,7 @@ public class UrlShortenerIntegrationTests {
 
     @Test
     public void testAliveWhenPeriodicityIsFalse() throws Exception {
-        ResponseEntity<String> entity = postLink("http://marca.com/", false, true, null);
+        ResponseEntity<String> entity = postLink("http://marca.com/", false, false, null);
 
         ReadContext rc = JsonPath.parse(entity.getBody());
         entity = restTemplate.getForEntity("/" + rc.read("$.hash") + "/alive", String.class);
@@ -123,7 +123,7 @@ public class UrlShortenerIntegrationTests {
 
     @Test
     public void testAliveWhenPeriodicityIsTrue() throws Exception {
-        ResponseEntity<String> entity = postLink("http://example.com/", true, true, null);
+        ResponseEntity<String> entity = postLink("http://example.com/", true, false, null);
 
         ReadContext rc = JsonPath.parse(entity.getBody());
         entity = restTemplate.getForEntity("/" + rc.read("$.hash") + "/alive", String.class);

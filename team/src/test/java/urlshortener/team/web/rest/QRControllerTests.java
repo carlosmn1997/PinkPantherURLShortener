@@ -2,9 +2,14 @@ package urlshortener.team.web.rest;
 
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import urlshortener.team.repository.ShortURLRepository;
@@ -15,11 +20,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static urlshortener.team.web.rest.fixture.QRFixture.*;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class QRControllerTests {
+
   private MockMvc mockMvc;
 
   @Mock
-  private ShortURLRepository shortURLRepository;
+  protected ShortURLRepository shortURLRepository;
 
   @InjectMocks
   private QRController qr;
@@ -30,7 +39,7 @@ public class QRControllerTests {
     this.mockMvc = MockMvcBuilders.standaloneSetup(qr).build();
   }
 
-  @Ignore
+  @Test
   public void thatDetectsBadId()
           throws Exception {
     when(shortURLRepository.findByKey("someKey")).thenReturn(null);
@@ -38,7 +47,7 @@ public class QRControllerTests {
             .andExpect(status().isBadRequest());
   }
 
-  @Ignore
+  @Test
   public void thatDetectsNoQR()
           throws Exception {
     when(shortURLRepository.findByKey("someKey")).thenReturn(someUrlwithNoQr());
@@ -46,7 +55,7 @@ public class QRControllerTests {
             .andExpect(status().isNotFound());
   }
 
-  @Ignore
+  @Test
   public void thatDetectsQrInProgress()
           throws Exception {
     when(shortURLRepository.findByKey("someKey")).thenReturn(someUrlwithQrProgress());
@@ -54,7 +63,7 @@ public class QRControllerTests {
             .andExpect(status().isNotFound());
   }
 
-  @Ignore
+  @Test
   public void thatSendsQR()
           throws Exception {
     when(shortURLRepository.findByKey("someKey")).thenReturn(someUrlwithQr());

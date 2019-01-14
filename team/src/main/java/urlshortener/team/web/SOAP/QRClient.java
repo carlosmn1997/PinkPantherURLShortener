@@ -3,7 +3,9 @@ package urlshortener.team.web.SOAP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.core.env.Environment;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.ClassUtils;
@@ -21,6 +23,7 @@ public class QRClient extends WebServiceGatewaySupport {
     private Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 
     public QRClient(){
+
         marshaller.setPackagesToScan(ClassUtils.getPackageName(GetQRRequest.class));
         try {
             marshaller.afterPropertiesSet();
@@ -30,6 +33,7 @@ public class QRClient extends WebServiceGatewaySupport {
         }
     }
 
+    @Async
     public GetQRResponse getQR(String hash,String uri) {
 
         GetQRRequest request = new GetQRRequest();
@@ -43,7 +47,8 @@ public class QRClient extends WebServiceGatewaySupport {
         GetQRResponse qr = new GetQRResponse();
         try {
 
-            Object response = ws.marshalSendAndReceive("http://localhost:8080/ws", request);
+            Object response =
+                    ws.marshalSendAndReceive("http://localhost:8080/ws", request);
             qr = (GetQRResponse) response;
 
         }
@@ -51,12 +56,6 @@ public class QRClient extends WebServiceGatewaySupport {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
-        try {
-            TimeUnit.SECONDS.sleep(2);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Segundo");
         return qr;
     }
 

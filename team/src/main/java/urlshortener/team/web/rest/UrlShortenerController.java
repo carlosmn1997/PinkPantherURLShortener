@@ -70,7 +70,6 @@ public class UrlShortenerController {
     if (qr) {
       QRClient qrSOAP=new QRClient();
       qrSOAP.getQR(su.getHash(),su.getUri().toString());
-      System.out.println("Primero");
       //qrRepository.createQR(su.getHash(), su.getUri().toString());
     }
     HttpHeaders h = new HttpHeaders();

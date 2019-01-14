@@ -29,6 +29,7 @@ public class QRRepositoryTests {
 
   @Autowired
   private JdbcTemplate jdbc;
+
   private byte[] b;
 
   @Before
