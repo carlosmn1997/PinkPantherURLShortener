@@ -30,6 +30,7 @@ public class QRClient extends WebServiceGatewaySupport {
         }
     }
 
+    @Async
     public GetQRResponse getQR(String hash,String uri) {
 
         GetQRRequest request = new GetQRRequest();
